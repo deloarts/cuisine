@@ -101,8 +101,11 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=ghcr.io/${{ github.repository }}/${{ matrix.component }},push-by-digest=true,name-canonical=true,push=true
+          # Read only: a run for a merged pull request gets a cache token
+          # without writable scopes, so a cache-to fails the build. The
+          # layers come from the release PR's CI run, which wrote them under
+          # the same scope.
           cache-from: type=gha,scope=${{ matrix.component }}-${{ matrix.arch }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.component }}-${{ matrix.arch }}
       # The manifest job below finds each platform's image by this file name.
       - name: Keep the digest
         env:
