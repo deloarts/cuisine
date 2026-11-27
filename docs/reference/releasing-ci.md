@@ -14,27 +14,30 @@ The CI jobs, the release workflow, the GHCR retention workflow and the release s
 | Job | Runs |
 | --- | ---- |
 | `backend` | ruff check and format, mypy strict, the OpenAPI snapshot check, the format schema check ([formats.md section 7](formats.md#7-schema-files-and-golden-fixtures)), pytest in parallel with coverage |
-| `backend-arm64` | pytest on linux/arm64: builds the backend Dockerfile's `dev` stage for arm64 under QEMU and runs the tests in it, mounted from the checkout. Slow under emulation, so it runs only on pushes to `release/**` and on the release PR |
+| `backend-arm64` | pytest on linux/arm64 on a native arm64 runner: builds the backend Dockerfile's `dev` stage and runs the tests in it, mounted from the checkout. It runs only on pushes, which are the pushes to `release/**`; the release PR shares their commit, so it does not run there again |
 | `backend-migrations` | `alembic upgrade head`, `alembic check` and `alembic downgrade base` on an empty Postgres 16 service |
 | `frontend` | `npm ci`, type-check, lint, unit tests, i18n parity, the API types check, the build |
-| `images` | builds both images for linux/amd64 and linux/arm64 (under QEMU) without pushing, so a broken Dockerfile or a dependency without an arm64 wheel fails the PR |
-| `gitleaks` | a secret scan over the full history with the pinned, checksum-verified binary |
+| `images` | builds both images for linux/amd64 and linux/arm64 without pushing, each platform natively on a runner of its own, so a broken Dockerfile or a dependency without an arm64 wheel fails the PR |
+| `gitleaks` | a secret scan over the full history with the pinned, checksum-verified binary, and a check that every tracked file starting with a shebang is committed executable (`100755`) |
 
 `images` is a matrix job, and a skipped matrix job reports a single `images` check instead of one per component, so the ruleset requires `images-verify`, which always runs and fails only when an image build failed or was cancelled. CodeQL is not a workflow of this repository; it runs through GitHub's default setup ([releasing-github-setup.md section 4](releasing-github-setup.md#4-code-security-and-dependency-updates)).
 
 Every third-party action is pinned to a commit SHA with its version in a comment.
+
+A checkout on a file system without executable bits, such as a Windows drive under WSL with `core.fileMode=false`, commits new scripts as `100644`. Mark them with `git update-index --chmod=+x <file>`; the `gitleaks` job fails otherwise.
 
 ## 2 the release workflow
 
 `.github/workflows/release.yml` runs when a pull request from `release/X.Y.Z` is merged into `main`:
 
 1. `guard` checks out the merge commit and runs `scripts/check_release_version.sh X.Y.Z`: a `0.Y.Z` version, both version files carrying it, a CHANGELOG section, no existing tag.
-2. `images` builds `backend` (target `prod`) and `frontend` from the merge commit for linux/amd64 and linux/arm64 and pushes them to `ghcr.io/<owner>/cuisine/<component>` under the candidate tag `sha-<commit>` only. Each tag is an image index listing both platforms, and a host pulls its own. arm64 builds under QEMU on the amd64 runner, since GitHub's arm64 runners are free only for public repositories; the frontend's build stage runs natively (`--platform=$BUILDPLATFORM`), because its output is the same static files on every platform.
-3. `resolve` pins both candidates by the digest of their image index, so every later job acts on exactly the images that were built.
-4. `smoke` runs `scripts/smoke_release_images.sh` against the two digests, once per platform: the release `docker-compose.yml` on an empty Postgres and Redis with throwaway secrets. The entrypoint must migrate the database, the backend must answer `/health` and `/ready` and report `X.Y.Z` on `/api/v1/public/info`, nginx must accept its configuration, and the frontend must serve the app and proxy `/health`, `/ready` and the API. The arm64 run sets `SMOKE_PLATFORM=linux/arm64`, which starts the whole stack as arm64 under QEMU and checks that the backend and frontend containers run on `aarch64`; it is slow, so it gets a longer `SMOKE_TIMEOUT`.
-5. `tag` tags the merge commit `vX.Y.Z` and pushes the tag, only once the smoke test passed.
-6. `publish` retags the tested digests as `vX.Y.Z`, `vX.Y` and `latest` with `docker buildx imagetools create --prefer-index=false` and checks that every tag names the tested digest.
-7. `github-release` creates the release with the CHANGELOG section as its notes.
+2. `images` builds `backend` (target `prod`) and `frontend` from the merge commit once per platform, linux/amd64 on `ubuntu-latest` and linux/arm64 natively on `ubuntu-24.04-arm`, and pushes each build to `ghcr.io/<owner>/cuisine/<component>` by digest only, without a tag.
+3. `manifest` joins each image's two platform digests into one image index under the candidate tag `sha-<commit>` and fails unless the index lists both platforms. A host pulls its own platform under the same name.
+4. `resolve` pins both candidates by the digest of their image index, so every later job acts on exactly the images that were built.
+5. `smoke` runs `scripts/smoke_release_images.sh` against the two digests, once per platform: the release `docker-compose.yml` on an empty Postgres and Redis with throwaway secrets. The entrypoint must migrate the database, the backend must answer `/health` and `/ready` and report `X.Y.Z` on `/api/v1/public/info`, nginx must accept its configuration, and the frontend must serve the app and proxy `/health`, `/ready` and the API. Each run is native: the arm64 run sets `SMOKE_PLATFORM=linux/arm64` on an arm64 runner, which starts the whole stack as arm64 and checks that the backend and frontend containers run on `aarch64`.
+6. `tag` tags the merge commit `vX.Y.Z` and pushes the tag, only once the smoke test passed.
+7. `publish` retags the tested digests as `vX.Y.Z`, `vX.Y` and `latest` with `docker buildx imagetools create --prefer-index=false` and checks that every tag names the tested digest.
+8. `github-release` creates the release with the CHANGELOG section as its notes.
 
 A failed smoke test publishes nothing and creates no tag. Fix the cause in a new pull request and release again; the failed candidate stays `sha-` only and the retention workflow removes it eventually.
 

@@ -31,8 +31,8 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
       shared: ${{ steps.filter.outputs.shared }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
           filters: |
@@ -55,9 +55,9 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         id: setup-python
         with:
           python-version: "3.13"
@@ -73,7 +73,7 @@ jobs:
       # The virtualenv links to the interpreter it was built with, so the key
       # carries the full Python version.
       - name: Set up Poetry cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: backend/.venv
           key: poetry-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('backend/poetry.lock') }}
@@ -100,26 +100,24 @@ jobs:
       - name: pytest
         run: poetry run pytest tests -q -n auto --cov=src --cov-report=term-missing:skip-covered
 
-  # The backend tests on linux/arm64, the platform a Raspberry Pi runs. It
-  # builds the Dockerfile's dev stage for arm64 under QEMU, which holds every
-  # dependency on the image's own Python, and runs pytest in it with the
-  # tests mounted, since the build context leaves them out. Emulation makes
-  # it slow, so it runs only for release branches: on their pushes and on
-  # the release PR, before release.yml publishes arm64 images.
+  # The backend tests on linux/arm64, the platform a Raspberry Pi runs, on a
+  # native arm64 runner. It builds the Dockerfile's dev stage, which holds
+  # every dependency on the image's own Python, and runs pytest in it with
+  # the tests mounted, since the build context leaves them out. It runs for
+  # pushes only, which are the release branches, before release.yml
+  # publishes arm64 images; the release PR shares the commit, so a second
+  # run there would only repeat this one.
   backend-arm64:
-    if: github.event_name == 'push' || startsWith(github.head_ref, 'release/')
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
-        with:
-          platforms: arm64
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: backend
           file: backend/docker/backend.Dockerfile
@@ -173,8 +171,8 @@ jobs:
       INIT__MAIL: ci@example.com
       INIT__PASSWORD: ci-password
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
       - name: Install Poetry
@@ -196,9 +194,9 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: frontend/.nvmrc
           cache: npm
@@ -229,39 +227,40 @@ jobs:
 
   # Both images build for every platform the release publishes, so a broken
   # Dockerfile or a dependency without an arm64 wheel fails the PR, not the
-  # release. arm64 builds under QEMU, as in release.yml.
+  # release. Each platform builds natively on its own runner, as in
+  # release.yml, whose matrix this one mirrors; change both together.
   images:
     needs: [changes, backend, frontend]
     if: always() && !failure() && !cancelled() && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.shared == 'true')
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
     strategy:
       matrix:
+        component: [backend, frontend]
+        platform: [linux/amd64, linux/arm64]
         include:
           - component: backend
-            context: backend
-            dockerfile: backend/docker/backend.Dockerfile
             target: prod
           - component: frontend
-            context: frontend
-            dockerfile: frontend/docker/frontend.Dockerfile
             target: ""
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch: arm64
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
-          platforms: arm64
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
-        with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
+          context: ${{ matrix.component }}
+          file: ${{ matrix.component }}/docker/${{ matrix.component }}.Dockerfile
           target: ${{ matrix.target }}
-          # The same list as release.yml's images job; change both together.
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
           push: false
-          cache-from: type=gha,scope=${{ matrix.component }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.component }}
+          cache-from: type=gha,scope=${{ matrix.component }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}-${{ matrix.arch }}
 
   # The required check for the image builds. A skipped matrix job reports one
   # check named `images` instead of one per component, so the ruleset requires
@@ -281,7 +280,9 @@ jobs:
           [ "$RESULT" = "success" ] || [ "$RESULT" = "skipped" ]
 
   # Secret scan over the full history. Runs the pinned release binary
-  # directly, its checksum verified, instead of gitleaks-action.
+  # directly, its checksum verified, instead of gitleaks-action. It also
+  # checks that every script is committed executable, since this required
+  # job runs on every change.
   gitleaks:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -289,7 +290,7 @@ jobs:
       GITLEAKS_VERSION: 8.30.1
       GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - name: Install gitleaks
@@ -300,3 +301,16 @@ jobs:
           tar -xzf "$archive" gitleaks
       - name: Scan
         run: ./gitleaks git --redact --no-banner --verbose .
+      # A checkout on a file system without executable bits commits scripts as 100644;
+      # the workflows and the release script then fail with "Permission denied".
+      - name: Scripts are executable
+        run: |
+          missing=0
+          while IFS=$'\t' read -r meta path; do
+            mode="${meta%% *}"
+            if [ "$mode" = 100644 ] && [ "$(head -c 2 "$path")" = '#!' ]; then
+              echo "::error file=$path::$path starts with a shebang but is not executable; run git update-index --chmod=+x $path"
+              missing=1
+            fi
+          done < <(git ls-files --stage)
+          exit "$missing"
