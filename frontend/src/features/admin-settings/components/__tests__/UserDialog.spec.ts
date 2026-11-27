@@ -9,14 +9,15 @@ import { defineComponent, h, ref } from 'vue'
 
 import { i18n } from '@/core/i18n'
 import type { UserResponse } from '@/core/types/user'
+import type { UserCreateBody, UserUpdateBody } from '@/features/admin-settings/api/users'
 import UserDialog from '@/features/admin-settings/components/UserDialog.vue'
 
 const api = vi.hoisted(() => ({
-  update: vi.fn(),
-  create: vi.fn(),
-  uploadAvatar: vi.fn(),
-  removeAvatar: vi.fn(),
-  resetTotp: vi.fn(),
+  update: vi.fn<(id: string, body: UserUpdateBody) => Promise<UserResponse>>(),
+  create: vi.fn<(body: UserCreateBody) => Promise<UserResponse>>(),
+  uploadAvatar: vi.fn<(id: string, file: File) => Promise<UserResponse>>(),
+  removeAvatar: vi.fn<(id: string) => Promise<UserResponse>>(),
+  resetTotp: vi.fn<(id: string) => Promise<UserResponse>>(),
 }))
 
 vi.mock('@/features/admin-settings/api/users', () => ({ usersApi: api }))
@@ -45,7 +46,7 @@ function user(extra: Partial<UserResponse> = {}): UserResponse {
 
 async function open(edited: UserResponse | null) {
   i18n.global.locale.value = 'enGB'
-  const saved = vi.fn()
+  const saved = vi.fn<() => void>()
   const wrapper = mount(
     defineComponent({
       setup() {

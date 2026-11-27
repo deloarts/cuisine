@@ -37,7 +37,7 @@ Settings → Rules → Rulesets.
 
 A branch ruleset targeting the default branch:
 
-- It sets *Restrict deletions*, *Block force pushes* and *Require linear history*.
+- It sets *Restrict deletions*, *Block force pushes*, *Require linear history* and *Require signed commits*. GitHub signs the squash commit of a pull request merged in the web interface, so the rule needs no signing key on any branch and only blocks commits that reach `main` another way.
 - It sets *Require a pull request before merging* with 0 approvals and Squash as the only allowed merge method.
 - It sets *Require status checks to pass* with *Require branches to be up to date before merging* enabled and the checks of `ci.yml`: `backend`, `backend-migrations`, `frontend`, `images-verify` and `gitleaks`. A check can only be picked once it has run at least once.
 - A job the path filter skips reports as passed, so a change that only touches the frontend still satisfies `backend` and `backend-migrations`.
