@@ -1,0 +1,396 @@
+# The ingredient families every instance is seeded with: kinds that several
+# catalogue ingredients share, such as tomatoes for fresh, chopped and
+# strained tomatoes. Flat, one level. Hand-edited.
+#
+# Fields: key (stable, never renamed; ingredients.yaml refers to it), names
+# per locale. Inserted once by key, never updated or brought back.
+
+- key: tomatoes
+  names:
+    en-GB: Tomatoes
+    de-AT: Paradeiser
+
+- key: onions
+  names:
+    en-GB: Onions
+    de-AT: Zwiebeln
+
+- key: garlic
+  names:
+    en-GB: Garlic
+    de-AT: Knoblauch
+
+- key: potatoes
+  names:
+    en-GB: Potatoes
+    de-AT: Erdäpfel
+
+- key: peppers
+  names:
+    en-GB: Peppers
+    de-AT: Paprika
+
+- key: cabbage
+  names:
+    en-GB: Cabbage
+    de-AT: Kohl & Kraut
+
+- key: salad_leaves
+  names:
+    en-GB: Salad leaves
+    de-AT: Blattsalate
+
+- key: squash
+  names:
+    en-GB: Squash
+    de-AT: Kürbisse
+
+- key: mushrooms
+  names:
+    en-GB: Mushrooms
+    de-AT: Pilze
+
+- key: beans
+  names:
+    en-GB: Beans
+    de-AT: Bohnen
+
+- key: peas
+  names:
+    en-GB: Peas
+    de-AT: Erbsen
+
+- key: lentils
+  names:
+    en-GB: Lentils
+    de-AT: Linsen
+
+- key: chickpeas
+  names:
+    en-GB: Chickpeas
+    de-AT: Kichererbsen
+
+- key: corn
+  names:
+    en-GB: Corn
+    de-AT: Mais
+
+- key: asparagus
+  names:
+    en-GB: Asparagus
+    de-AT: Spargel
+
+- key: radishes
+  names:
+    en-GB: Radishes
+    de-AT: Rettiche & Radieschen
+
+- key: celery
+  names:
+    en-GB: Celery
+    de-AT: Sellerie
+
+- key: cucumbers
+  names:
+    en-GB: Cucumbers
+    de-AT: Gurken
+
+- key: spinach
+  names:
+    en-GB: Spinach
+    de-AT: Spinat
+
+- key: apples
+  names:
+    en-GB: Apples
+    de-AT: Äpfel
+
+- key: citrus
+  names:
+    en-GB: Citrus fruit
+    de-AT: Zitrusfrüchte
+
+- key: berries
+  names:
+    en-GB: Berries
+    de-AT: Beeren
+
+- key: cherries
+  names:
+    en-GB: Cherries
+    de-AT: Kirschen
+
+- key: apricots
+  names:
+    en-GB: Apricots
+    de-AT: Marillen
+
+- key: plums
+  names:
+    en-GB: Plums
+    de-AT: Zwetschken
+
+- key: peaches
+  names:
+    en-GB: Peaches
+    de-AT: Pfirsiche
+
+- key: grapes
+  names:
+    en-GB: Grapes
+    de-AT: Trauben
+
+- key: melons
+  names:
+    en-GB: Melons
+    de-AT: Melonen
+
+- key: coconut
+  names:
+    en-GB: Coconut
+    de-AT: Kokos
+
+- key: bread
+  names:
+    en-GB: Bread
+    de-AT: Brot
+
+- key: pastry
+  names:
+    en-GB: Pastry
+    de-AT: Teige
+
+- key: flour
+  names:
+    en-GB: Flour
+    de-AT: Mehl
+
+- key: rice
+  names:
+    en-GB: Rice
+    de-AT: Reis
+
+- key: pasta
+  names:
+    en-GB: Pasta
+    de-AT: Nudeln
+
+- key: asian_noodles
+  names:
+    en-GB: Asian noodles
+    de-AT: Asiatische Nudeln
+
+- key: eggs
+  names:
+    en-GB: Eggs
+    de-AT: Eier
+
+- key: milk
+  names:
+    en-GB: Milk
+    de-AT: Milch
+
+- key: plant_drinks
+  names:
+    en-GB: Plant-based drinks
+    de-AT: Pflanzendrinks
+
+- key: cream
+  names:
+    en-GB: Cream
+    de-AT: Obers & Rahm
+
+- key: butter
+  names:
+    en-GB: Butter
+    de-AT: Butter
+
+- key: yoghurt
+  names:
+    en-GB: Yoghurt
+    de-AT: Joghurt
+
+- key: cheese
+  names:
+    en-GB: Cheese
+    de-AT: Käse
+
+- key: beef
+  names:
+    en-GB: Beef
+    de-AT: Rindfleisch
+
+- key: pork
+  names:
+    en-GB: Pork
+    de-AT: Schweinefleisch
+
+- key: lamb
+  names:
+    en-GB: Lamb
+    de-AT: Lamm
+
+- key: chicken
+  names:
+    en-GB: Chicken
+    de-AT: Huhn
+
+- key: turkey
+  names:
+    en-GB: Turkey
+    de-AT: Pute
+
+- key: duck
+  names:
+    en-GB: Duck & goose
+    de-AT: Ente & Gans
+
+- key: game
+  names:
+    en-GB: Game
+    de-AT: Wild
+
+- key: offal
+  names:
+    en-GB: Offal
+    de-AT: Innereien
+
+- key: fish
+  names:
+    en-GB: Fish
+    de-AT: Fisch
+
+- key: seafood
+  names:
+    en-GB: Seafood
+    de-AT: Meeresfrüchte
+
+- key: nuts
+  names:
+    en-GB: Nuts
+    de-AT: Nüsse
+
+- key: peanuts
+  names:
+    en-GB: Peanuts
+    de-AT: Erdnüsse
+
+- key: seeds
+  names:
+    en-GB: Seeds
+    de-AT: Samen & Kerne
+
+- key: soy
+  names:
+    en-GB: Soy
+    de-AT: Soja
+
+- key: oil
+  names:
+    en-GB: Oil
+    de-AT: Öl
+
+- key: sugar
+  names:
+    en-GB: Sugar
+    de-AT: Zucker
+
+- key: chocolate
+  names:
+    en-GB: Chocolate
+    de-AT: Schokolade
+
+- key: vanilla
+  names:
+    en-GB: Vanilla
+    de-AT: Vanille
+
+- key: raising_agents
+  names:
+    en-GB: Raising agents
+    de-AT: Triebmittel
+
+- key: gelling_agents
+  names:
+    en-GB: Gelling agents
+    de-AT: Geliermittel
+
+- key: vinegar
+  names:
+    en-GB: Vinegar
+    de-AT: Essig
+
+- key: mustard
+  names:
+    en-GB: Mustard
+    de-AT: Senf
+
+- key: stock
+  names:
+    en-GB: Stock
+    de-AT: Suppe & Fond
+
+- key: salt
+  names:
+    en-GB: Salt
+    de-AT: Salz
+
+- key: pepper
+  names:
+    en-GB: Pepper
+    de-AT: Pfeffer
+
+- key: cinnamon
+  names:
+    en-GB: Cinnamon
+    de-AT: Zimt
+
+- key: ginger
+  names:
+    en-GB: Ginger
+    de-AT: Ingwer
+
+- key: spice_blends
+  names:
+    en-GB: Spice blends
+    de-AT: Gewürzmischungen
+
+- key: basil
+  names:
+    en-GB: Basil
+    de-AT: Basilikum
+
+- key: thyme
+  names:
+    en-GB: Thyme
+    de-AT: Thymian
+
+- key: rosemary
+  names:
+    en-GB: Rosemary
+    de-AT: Rosmarin
+
+- key: olives
+  names:
+    en-GB: Olives
+    de-AT: Oliven
+
+- key: wine
+  names:
+    en-GB: Wine
+    de-AT: Wein
+
+- key: spirits
+  names:
+    en-GB: Spirits
+    de-AT: Spirituosen
+
+- key: soft_drinks
+  names:
+    en-GB: Soft drinks
+    de-AT: Erfrischungsgetränke
+
+- key: tea
+  names:
+    en-GB: Tea
+    de-AT: Tee

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cuisine:protocol:cuisine-peering:1:event",
+  "title": "cuisine-peering version 1: event",
+  "type": "object",
+  "description": "POST /events: one thin event of a peer channel. Item events (`item.shared`, `item.updated`, `item.withdrawn`) name the item's kind, id and revision; the receiver fetches the content itself. `seq` only grows; `prev_seq` is the sequence of the event before it in the sender's log, so the receiver can tell a gap from the holes that collapsing updates leaves.",
+  "properties": {
+    "type": {
+      "type": "string"
+    },
+    "seq": {
+      "type": "integer"
+    },
+    "prev_seq": {
+      "type": "integer"
+    },
+    "kind": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "peer": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PeerUpdateV1"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "type",
+    "seq",
+    "prev_seq"
+  ],
+  "$defs": {
+    "PeerUpdateV1": {
+      "type": "object",
+      "description": "What changed about the sending instance, carried by `peer.updated`.",
+      "properties": {
+        "app_version": {
+          "type": "string"
+        },
+        "protocol_versions": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "formats": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

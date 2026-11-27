@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cuisine:protocol:cuisine-peering:1:handshake-request",
+  "title": "cuisine-peering version 1: handshake-request",
+  "type": "object",
+  "description": "POST /handshake: the accepting instance's identity, the invitation code and the secret the inviting instance shall sign its requests with.",
+  "properties": {
+    "instance_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "base_url": {
+      "type": "string"
+    },
+    "protocol_versions": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "code": {
+      "type": "string"
+    },
+    "secret": {
+      "type": "string"
+    },
+    "app_version": {
+      "type": "string"
+    },
+    "formats": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "instance_id",
+    "name",
+    "base_url",
+    "protocol_versions",
+    "code",
+    "secret"
+  ],
+  "$defs": {}
+}

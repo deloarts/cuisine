@@ -1,0 +1,273 @@
+# The units every instance is seeded with, in this order. Hand-edited.
+#
+# Fields: key (stable, never renamed; also the unit's code), kind (mass,
+# volume, count, other), to_base (grams per unit for mass, millilitres for
+# volume, empty otherwise), names per locale as [singular, plural,
+# abbreviation]. The startup seed inserts a key once and never updates or
+# brings back a unit afterwards (docs/reference/cookbook.md section 10).
+
+- key: g
+  kind: mass
+  to_base: 1.0
+  names:
+    en-GB: [gram, grams, g]
+    de-AT: [Gramm, Gramm, g]
+
+- key: kg
+  kind: mass
+  to_base: 1000.0
+  names:
+    en-GB: [kilogram, kilograms, kg]
+    de-AT: [Kilogramm, Kilogramm, kg]
+
+- key: mg
+  kind: mass
+  to_base: 0.001
+  names:
+    en-GB: [milligram, milligrams, mg]
+    de-AT: [Milligramm, Milligramm, mg]
+
+- key: dag
+  kind: mass
+  to_base: 10.0
+  names:
+    en-GB: [decagram, decagrams, dag]
+    de-AT: [Dekagramm, Dekagramm, dag]
+
+- key: ml
+  kind: volume
+  to_base: 1.0
+  names:
+    en-GB: [millilitre, millilitres, ml]
+    de-AT: [Milliliter, Milliliter, ml]
+
+- key: cl
+  kind: volume
+  to_base: 10.0
+  names:
+    en-GB: [centilitre, centilitres, cl]
+    de-AT: [Zentiliter, Zentiliter, cl]
+
+- key: dl
+  kind: volume
+  to_base: 100.0
+  names:
+    en-GB: [decilitre, decilitres, dl]
+    de-AT: [Deziliter, Deziliter, dl]
+
+- key: l
+  kind: volume
+  to_base: 1000.0
+  names:
+    en-GB: [litre, litres, l]
+    de-AT: [Liter, Liter, l]
+
+- key: tsp
+  kind: volume
+  to_base: 5.0
+  names:
+    en-GB: [teaspoon, teaspoons, tsp]
+    de-AT: [Teelöffel, Teelöffel, TL]
+
+- key: tbsp
+  kind: volume
+  to_base: 15.0
+  names:
+    en-GB: [tablespoon, tablespoons, tbsp]
+    de-AT: [Esslöffel, Esslöffel, EL]
+
+- key: cup
+  kind: volume
+  to_base: 250.0
+  names:
+    en-GB: [cup, cups, cup]
+    de-AT: [Tasse, Tassen, Tasse]
+
+- key: pinch
+  kind: other
+  to_base: null
+  names:
+    en-GB: [pinch, pinches, pinch]
+    de-AT: [Prise, Prisen, Prise]
+
+- key: piece
+  kind: count
+  to_base: null
+  names:
+    en-GB: [piece, pieces, pc]
+    de-AT: [Stück, Stück, Stk.]
+
+- key: clove
+  kind: count
+  to_base: null
+  names:
+    en-GB: [clove, cloves, clove]
+    de-AT: [Zehe, Zehen, Zehe]
+
+- key: slice
+  kind: count
+  to_base: null
+  names:
+    en-GB: [slice, slices, slice]
+    de-AT: [Scheibe, Scheiben, Scheibe]
+
+- key: can
+  kind: count
+  to_base: null
+  names:
+    en-GB: [can, cans, can]
+    de-AT: [Dose, Dosen, Dose]
+
+- key: bunch
+  kind: count
+  to_base: null
+  names:
+    en-GB: [bunch, bunches, bunch]
+    de-AT: [Bund, Bund, Bund]
+
+- key: package
+  kind: count
+  to_base: null
+  names:
+    en-GB: [package, packages, pkg]
+    de-AT: [Packung, Packungen, Pkg.]
+
+- key: sprig
+  kind: count
+  to_base: null
+  names:
+    en-GB: [sprig, sprigs, sprig]
+    de-AT: [Zweig, Zweige, Zweig]
+
+- key: sheet
+  kind: count
+  to_base: null
+  names:
+    en-GB: [sheet, sheets, sheet]
+    de-AT: [Blatt, Blätter, Bl.]
+
+- key: tub
+  kind: count
+  to_base: null
+  names:
+    en-GB: [tub, tubs, tub]
+    de-AT: [Becher, Becher, Becher]
+
+- key: cube
+  kind: count
+  to_base: null
+  names:
+    en-GB: [cube, cubes, cube]
+    de-AT: [Würfel, Würfel, Würfel]
+
+- key: jar
+  kind: count
+  to_base: null
+  names:
+    en-GB: [jar, jars, jar]
+    de-AT: [Glas, Gläser, Glas]
+
+- key: sachet
+  kind: count
+  to_base: null
+  names:
+    en-GB: [sachet, sachets, sachet]
+    de-AT: [Packerl, Packerl, Pckl.]
+
+- key: head
+  kind: count
+  to_base: null
+  names:
+    en-GB: [head, heads, head]
+    de-AT: [Kopf, Köpfe, Kopf]
+
+- key: stalk
+  kind: count
+  to_base: null
+  names:
+    en-GB: [stalk, stalks, stalk]
+    de-AT: [Stange, Stangen, Stange]
+
+- key: bulb
+  kind: count
+  to_base: null
+  names:
+    en-GB: [bulb, bulbs, bulb]
+    de-AT: [Knolle, Knollen, Knolle]
+
+- key: handful
+  kind: count
+  to_base: null
+  names:
+    en-GB: [handful, handfuls, handful]
+    de-AT: [Handvoll, Handvoll, Handvoll]
+
+- key: piece_cm
+  kind: count
+  to_base: null
+  names:
+    en-GB: [centimetre piece, centimetre pieces, cm]
+    de-AT: [Zentimeter-Stück, Zentimeter-Stück, cm]
+
+- key: knife_tip
+  kind: other
+  to_base: null
+  names:
+    en-GB: [knife tip, knife tips, knife tip]
+    de-AT: [Messerspitze, Messerspitzen, Msp.]
+
+- key: dash
+  kind: other
+  to_base: null
+  names:
+    en-GB: [dash, dashes, dash]
+    de-AT: [Schuss, Schuss, Schuss]
+
+- key: drop
+  kind: other
+  to_base: null
+  names:
+    en-GB: [drop, drops, drop]
+    de-AT: [Tropfen, Tropfen, Tropfen]
+
+- key: oz
+  kind: mass
+  to_base: 28.349523125
+  names:
+    en-GB: [ounce, ounces, oz]
+    de-AT: [Unze, Unzen, oz]
+
+- key: lb
+  kind: mass
+  to_base: 453.59237
+  names:
+    en-GB: [pound, pounds, lb]
+    de-AT: [US-Pfund, US-Pfund, lb]
+
+- key: fl_oz
+  kind: volume
+  to_base: 29.5735
+  names:
+    en-GB: [US fluid ounce, US fluid ounces, US fl oz]
+    de-AT: [US-Flüssigunze, US-Flüssigunzen, fl. oz.]
+
+- key: us_cup
+  kind: volume
+  to_base: 236.588
+  names:
+    en-GB: [US cup, US cups, US cup]
+    de-AT: [US-Cup, US-Cups, US-Cup]
+
+- key: bottle
+  kind: count
+  to_base: null
+  names:
+    en-GB: [bottle, bottles, btl]
+    de-AT: [Flasche, Flaschen, Fl.]
+
+- key: shot
+  kind: volume
+  to_base: 20.0
+  names:
+    en-GB: [shot, shots, shot]
+    de-AT: [Stamperl, Stamperl, Stamperl]

@@ -1,0 +1,411 @@
+# The tags every instance is seeded with. Hand-edited.
+#
+# Fields: key (stable, never renamed), kind (meal, cuisine, occasion, other;
+# diets are derived from ingredients, not tagged), color (hex), names per
+# locale. Inserted once by key, never updated or brought back.
+
+- key: breakfast
+  kind: meal
+  color: "#d97706"
+  names:
+    en-GB: Breakfast
+    de-AT: Frühstück
+
+- key: lunch
+  kind: meal
+  color: "#16a34a"
+  names:
+    en-GB: Lunch
+    de-AT: Mittagessen
+
+- key: dinner
+  kind: meal
+  color: "#2563eb"
+  names:
+    en-GB: Dinner
+    de-AT: Abendessen
+
+- key: snack
+  kind: meal
+  color: "#9333ea"
+  names:
+    en-GB: Snack
+    de-AT: Snack
+
+- key: dessert
+  kind: meal
+  color: "#db2777"
+  names:
+    en-GB: Dessert
+    de-AT: Dessert
+
+- key: drink
+  kind: meal
+  color: "#0891b2"
+  names:
+    en-GB: Drink
+    de-AT: Getränk
+
+- key: starter
+  kind: meal
+  color: "#0d9488"
+  names:
+    en-GB: Starter
+    de-AT: Vorspeise
+
+- key: main_course
+  kind: meal
+  color: "#4338ca"
+  names:
+    en-GB: Main course
+    de-AT: Hauptspeise
+
+- key: soup
+  kind: meal
+  color: "#ca8a04"
+  names:
+    en-GB: Soup
+    de-AT: Suppe
+
+- key: salad
+  kind: meal
+  color: "#4d7c0f"
+  names:
+    en-GB: Salad
+    de-AT: Salat
+
+- key: baking
+  kind: meal
+  color: "#a16207"
+  names:
+    en-GB: Baking
+    de-AT: Backen
+
+- key: quick
+  kind: occasion
+  color: "#ea580c"
+  names:
+    en-GB: Quick
+    de-AT: Schnell
+
+- key: party
+  kind: occasion
+  color: "#c026d3"
+  names:
+    en-GB: Party
+    de-AT: Feier
+
+- key: christmas
+  kind: occasion
+  color: "#b91c1c"
+  names:
+    en-GB: Christmas
+    de-AT: Weihnachten
+
+- key: austrian
+  kind: cuisine
+  color: "#dc2626"
+  names:
+    en-GB: Austrian
+    de-AT: Österreichisch
+
+- key: italian
+  kind: cuisine
+  color: "#059669"
+  names:
+    en-GB: Italian
+    de-AT: Italienisch
+
+- key: asian
+  kind: cuisine
+  color: "#be185d"
+  names:
+    en-GB: Asian
+    de-AT: Asiatisch
+
+- key: french
+  kind: cuisine
+  color: "#1e3a8a"
+  names:
+    en-GB: French
+    de-AT: Französisch
+
+- key: greek
+  kind: cuisine
+  color: "#0284c7"
+  names:
+    en-GB: Greek
+    de-AT: Griechisch
+
+- key: spanish
+  kind: cuisine
+  color: "#f59e0b"
+  names:
+    en-GB: Spanish
+    de-AT: Spanisch
+
+- key: hungarian
+  kind: cuisine
+  color: "#991b1b"
+  names:
+    en-GB: Hungarian
+    de-AT: Ungarisch
+
+- key: german
+  kind: cuisine
+  color: "#57534e"
+  names:
+    en-GB: German
+    de-AT: Deutsch
+
+- key: mexican
+  kind: cuisine
+  color: "#65a30d"
+  names:
+    en-GB: Mexican
+    de-AT: Mexikanisch
+
+- key: indian
+  kind: cuisine
+  color: "#f97316"
+  names:
+    en-GB: Indian
+    de-AT: Indisch
+
+- key: middle_eastern
+  kind: cuisine
+  color: "#b45309"
+  names:
+    en-GB: Middle Eastern
+    de-AT: Nahöstlich
+
+- key: american
+  kind: cuisine
+  color: "#334155"
+  names:
+    en-GB: American
+    de-AT: Amerikanisch
+
+- key: chinese
+  kind: cuisine
+  color: "#e11d48"
+  names:
+    en-GB: Chinese
+    de-AT: Chinesisch
+
+- key: japanese
+  kind: cuisine
+  color: "#f43f5e"
+  names:
+    en-GB: Japanese
+    de-AT: Japanisch
+
+- key: thai
+  kind: cuisine
+  color: "#14b8a6"
+  names:
+    en-GB: Thai
+    de-AT: Thailändisch
+
+- key: vietnamese
+  kind: cuisine
+  color: "#22c55e"
+  names:
+    en-GB: Vietnamese
+    de-AT: Vietnamesisch
+
+- key: side_dish
+  kind: meal
+  color: "#84cc16"
+  names:
+    en-GB: Side dish
+    de-AT: Beilage
+
+- key: sauce_dip
+  kind: meal
+  color: "#eab308"
+  names:
+    en-GB: Sauce & dip
+    de-AT: Sauce & Dip
+
+- key: spread
+  kind: meal
+  color: "#92400e"
+  names:
+    en-GB: Spread
+    de-AT: Aufstrich
+
+- key: bread
+  kind: meal
+  color: "#78350f"
+  names:
+    en-GB: Bread
+    de-AT: Brot
+
+- key: preserves
+  kind: meal
+  color: "#7e22ce"
+  names:
+    en-GB: Preserves
+    de-AT: Eingemachtes
+
+- key: easter
+  kind: occasion
+  color: "#facc15"
+  names:
+    en-GB: Easter
+    de-AT: Ostern
+
+- key: bbq
+  kind: occasion
+  color: "#9a3412"
+  names:
+    en-GB: Barbecue
+    de-AT: Grillen
+
+- key: picnic
+  kind: occasion
+  color: "#15803d"
+  names:
+    en-GB: Picnic
+    de-AT: Picknick
+
+- key: guests
+  kind: occasion
+  color: "#a21caf"
+  names:
+    en-GB: Guests
+    de-AT: Gäste
+
+- key: sunday_roast
+  kind: occasion
+  color: "#854d0e"
+  names:
+    en-GB: Sunday roast
+    de-AT: Sonntagsbraten
+
+- key: one_pot
+  kind: other
+  color: "#0f766e"
+  names:
+    en-GB: One-pot
+    de-AT: Aus einem Topf
+
+- key: meal_prep
+  kind: other
+  color: "#0369a1"
+  names:
+    en-GB: Meal prep
+    de-AT: Vorkochen
+
+- key: freezer_friendly
+  kind: other
+  color: "#06b6d4"
+  names:
+    en-GB: Freezer-friendly
+    de-AT: Zum Einfrieren
+
+- key: make_ahead
+  kind: other
+  color: "#6366f1"
+  names:
+    en-GB: Make ahead
+    de-AT: Gut vorzubereiten
+
+- key: kid_friendly
+  kind: other
+  color: "#ec4899"
+  names:
+    en-GB: Kid-friendly
+    de-AT: Kinderfreundlich
+
+- key: budget
+  kind: other
+  color: "#64748b"
+  names:
+    en-GB: Budget
+    de-AT: Günstig
+
+- key: leftovers
+  kind: other
+  color: "#8b5cf6"
+  names:
+    en-GB: Leftovers
+    de-AT: Resteverwertung
+
+- key: new_years_eve
+  kind: occasion
+  color: "#d4af37"
+  names:
+    en-GB: "New Year's Eve"
+    de-AT: Silvester
+
+- key: carnival
+  kind: occasion
+  color: "#e879f9"
+  names:
+    en-GB: Carnival
+    de-AT: Fasching
+
+- key: birthday
+  kind: occasion
+  color: "#f472b6"
+  names:
+    en-GB: Birthday
+    de-AT: Geburtstag
+
+- key: halloween
+  kind: occasion
+  color: "#c2410c"
+  names:
+    en-GB: Halloween
+    de-AT: Halloween
+
+- key: valentines_day
+  kind: occasion
+  color: "#be123c"
+  names:
+    en-GB: "Valentine's Day"
+    de-AT: Valentinstag
+
+- key: jause
+  kind: meal
+  color: "#78716c"
+  names:
+    en-GB: Jause
+    de-AT: Jause
+
+- key: brunch
+  kind: meal
+  color: "#fb923c"
+  names:
+    en-GB: Brunch
+    de-AT: Brunch
+
+- key: christmas_biscuits
+  kind: meal
+  color: "#7f1d1d"
+  names:
+    en-GB: Christmas biscuits
+    de-AT: Weihnachtsbäckerei
+
+- key: cakes
+  kind: meal
+  color: "#9d174d"
+  names:
+    en-GB: "Cakes & gateaux"
+    de-AT: "Kuchen & Torten"
+
+- key: finger_food
+  kind: meal
+  color: "#0e7490"
+  names:
+    en-GB: Finger food
+    de-AT: Fingerfood
+
+- key: cocktails
+  kind: meal
+  color: "#7c3aed"
+  names:
+    en-GB: Cocktails
+    de-AT: Cocktails

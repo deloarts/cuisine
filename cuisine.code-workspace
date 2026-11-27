@@ -1,0 +1,25 @@
+{
+  "folders": [
+    { "name": "backend", "path": "backend" },
+    { "name": "frontend", "path": "frontend" },
+    { "name": "cuisine", "path": "." },
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/.pytest_cache": true,
+      "**/.mypy_cache": true,
+      "**/.ruff_cache": true,
+      "**/node_modules": true,
+      "**/.volumes": true,
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.venv": true,
+      "**/dist": true,
+      "backend/openapi/*.json": true,
+      "frontend/src/core/api/generated/**": true,
+    },
+    "files.associations": { "*.Dockerfile": "dockerfile" },
+  },
+}

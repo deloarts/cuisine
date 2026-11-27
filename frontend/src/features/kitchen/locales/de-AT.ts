@@ -1,0 +1,22 @@
+export default {
+  kitchen: {
+    loading: 'Deine Küche wird geladen …',
+    ownerHousehold: 'Die Küche deines Haushalts',
+    ownerPersonal: 'Deine eigene Küche',
+    householdHint: 'Alle in deinem Haushalt bearbeiten diese Liste. Sonst sieht sie niemand.',
+    personalHint: 'Nur du siehst diese Liste.',
+    introTitle: 'Was hast du in deiner Küche?',
+    introText: 'Hak die Küchengeräte an, die du hast, dann sagen dir Rezepte, wenn ihnen etwas fehlt, etwa eine Küchenmaschine. Bis dahin wird nichts markiert.',
+    start: 'Meine Küche einrichten',
+    setupHint: 'Die alltägliche Grundausstattung ist schon angehakt. Nimm weg, was dir fehlt, und hak an, was du sonst noch hast.',
+    search: 'Küchengeräte suchen',
+    count: 'Nichts angehakt | Ein Teil angehakt | {count} Teile angehakt',
+    saving: 'wird gespeichert …',
+    noMatch: 'Kein Küchengerät passt zur Suche.',
+    basic: 'Grundausstattung',
+    finish: 'Meine Küche speichern',
+    ready: 'Deine Küche ist eingerichtet. Rezepte sagen dir jetzt, was dir fehlt.',
+    forget: 'Neu anfangen',
+    forgetConfirm: 'Diese Küche vergessen? Rezepte markieren fehlende Küchengeräte erst wieder, wenn du sie neu einrichtest.',
+  },
+}

@@ -1,0 +1,22 @@
+export default {
+  kitchen: {
+    loading: 'Loading your kitchen…',
+    ownerHousehold: "Your household's kitchen",
+    ownerPersonal: 'Your own kitchen',
+    householdHint: 'Everyone in your household edits this list. Nobody else sees it.',
+    personalHint: 'Only you see this list.',
+    introTitle: 'What is in your kitchen?',
+    introText: 'Tick the equipment you have, and recipes will tell you when they need something you are missing, such as a stand mixer. Until then nothing is flagged.',
+    start: 'Set up my kitchen',
+    setupHint: 'The everyday basics are ticked already. Untick what you lack and tick what else you have.',
+    search: 'Search equipment',
+    count: 'Nothing ticked | One item ticked | {count} items ticked',
+    saving: 'saving…',
+    noMatch: 'No equipment matches the search.',
+    basic: 'Basic',
+    finish: 'Save my kitchen',
+    ready: 'Your kitchen is set up. Recipes now say what you are missing.',
+    forget: 'Start over',
+    forgetConfirm: 'Forget this kitchen? Recipes stop flagging missing equipment until it is set up again.',
+  },
+}

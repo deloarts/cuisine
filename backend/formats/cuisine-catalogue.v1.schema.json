@@ -1,0 +1,528 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cuisine:format:cuisine-catalogue:1",
+  "title": "cuisine-catalogue version 1",
+  "type": "object",
+  "description": "A whole catalogue: units, tags, ingredient categories and families, ingredients and equipment. It carries no images.",
+  "properties": {
+    "format": {
+      "const": "cuisine-catalogue"
+    },
+    "version": {
+      "const": 1
+    },
+    "exported_at": {
+      "type": "string"
+    },
+    "instance_id": {
+      "description": "The instance id of the exporting instance.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/UnitEntryV1"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/TagEntryV1"
+      }
+    },
+    "categories": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/CategoryEntryV1"
+      }
+    },
+    "families": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/FamilyEntryV1"
+      }
+    },
+    "ingredients": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/IngredientEntryV1"
+      }
+    },
+    "equipment": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/EquipmentEntryV1"
+      }
+    }
+  },
+  "required": [
+    "format",
+    "version"
+  ],
+  "$defs": {
+    "CategoryEntryV1": {
+      "type": "object",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "names": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "sort_order": {
+          "type": "integer"
+        }
+      }
+    },
+    "ConversionV1": {
+      "type": "object",
+      "properties": {
+        "unit_id": {
+          "description": "A key of the document's units.",
+          "type": "string"
+        },
+        "grams": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "unit_id",
+        "grams"
+      ]
+    },
+    "EquipmentEntryV1": {
+      "type": "object",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "description": "cookware, bakeware, appliance or utensil.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "names": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "aliases": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "basic": {
+          "type": "boolean"
+        }
+      }
+    },
+    "FamilyEntryV1": {
+      "type": "object",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "names": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "IngredientEntryV1": {
+      "type": "object",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "original_locale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "names": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/IngredientNameV1"
+          }
+        },
+        "aliases": {
+          "description": "Other names per locale.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "category": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NamedRefV1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "family": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NamedRefV1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nutrition": {
+          "$ref": "#/$defs/NutritionV1"
+        },
+        "extended_nutrition": {
+          "description": "Extended nutrients per 100 g by key, such as vitamin_c_mg.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "season_months": {
+          "description": "Months 1 to 12 in season; empty is not seasonal.",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "density_g_per_ml": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conversions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConversionV1"
+          }
+        },
+        "allergens": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "diet_markers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "IngredientNameV1": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "plural_name": {
+          "type": "string"
+        }
+      }
+    },
+    "NamedRefV1": {
+      "type": "object",
+      "description": "A category or family an ingredient belongs to, by seed key and names.",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "names": {
+          "description": "Name per locale.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "description": "Its public id on the exporting instance.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "NutritionV1": {
+      "type": "object",
+      "description": "Per 100 g: energy in kcal, everything else in grams. Null is unknown.",
+      "properties": {
+        "kcal": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protein": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fat": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "saturated_fat": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "carbohydrates": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sugar": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fibre": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "salt": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "TagEntryV1": {
+      "type": "object",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "names": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "color": {
+          "description": "A hex colour such as #d97706.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "UnitEntryV1": {
+      "type": "object",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "code": {
+          "description": "The stable unit code, such as g or tbsp.",
+          "type": "string"
+        },
+        "names": {
+          "description": "Name per locale.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "kind": {
+          "description": "mass, volume, count or other.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "to_base": {
+          "description": "Grams per unit for mass, millilitres for volume.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plural_names": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "abbreviations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "code"
+      ]
+    }
+  }
+}

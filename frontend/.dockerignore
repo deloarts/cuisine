@@ -1,0 +1,15 @@
+# Keeps the build context free of things the image has no business
+# containing. `npm ci` inside the image reinstalls node_modules from the
+# lockfile, so a local node_modules is never copied in.
+.git
+node_modules
+dist
+coverage
+.vscode
+.idea
+*.log
+*.local
+.env
+.env.*
+.dockerignore
+docker/frontend.Dockerfile

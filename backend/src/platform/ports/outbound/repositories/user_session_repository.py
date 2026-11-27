@@ -1,0 +1,13 @@
+from datetime import datetime
+from typing import Protocol
+
+from src.platform.domain.entities.user_session import UserSession
+
+
+class IUserSessionRepository(Protocol):
+    async def get_by_public_id(self, public_id: str) -> UserSession | None: ...
+    async def list_active(self, user_id: int) -> list[UserSession]: ...
+    async def save(self, session: UserSession) -> UserSession: ...
+    async def revoke_all(
+        self, user_id: int, now: datetime, *, except_public_id: str | None = None
+    ) -> int: ...

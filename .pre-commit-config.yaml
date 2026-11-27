@@ -1,0 +1,67 @@
+repos:
+  # Blocks staged secrets before they reach a commit. CI's gitleaks job is
+  # the backstop for clones without the hooks installed.
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      # ruff and mypy run from the Poetry environment, so the hook and CI
+      # always use the versions in poetry.lock, over the same scope as CI.
+      - id: ruff
+        name: ruff check --fix
+        entry: bash -c 'cd backend && poetry run ruff check --fix src tests scripts alembic'
+        language: system
+        types: [python]
+        files: ^backend/
+        pass_filenames: false
+
+      - id: ruff-format
+        name: ruff format
+        entry: bash -c 'cd backend && poetry run ruff format src tests scripts alembic'
+        language: system
+        types: [python]
+        files: ^backend/
+        pass_filenames: false
+
+      - id: mypy
+        name: mypy
+        entry: bash -c 'cd backend && poetry run mypy src scripts tests'
+        language: system
+        types: [python]
+        files: ^backend/
+        pass_filenames: false
+
+      # Regenerates the frontend's API types from the fresh snapshot in the
+      # same step, so a backend change never leaves them behind; CI only
+      # checks for drift.
+      - id: export-openapi
+        name: export OpenAPI snapshot and frontend API types
+        entry: bash -c 'cd backend && poetry run python scripts/export_openapi.py && cd ../frontend && npm run --silent generate:api-types'
+        language: system
+        types: [python]
+        files: ^backend/
+        pass_filenames: false
+
+      # Rewrites the JSON Schema of every exchange format version and every
+      # peering protocol message from their dataclasses; CI only checks for
+      # drift.
+      - id: export-formats
+        name: export format schemas
+        entry: bash -c 'cd backend && poetry run python scripts/export_formats.py'
+        language: system
+        types: [python]
+        files: ^backend/src/(cookbook/application/services/formats/|platform/application/services/peering_messages\.py)
+        pass_filenames: false
+
+      # The test suites run in CI, not as a hook; they are too slow for a
+      # commit-time gate.
+
+      - id: frontend-lint
+        name: frontend lint (oxlint + eslint + stylelint)
+        entry: bash -c 'cd frontend && npm run lint'
+        language: system
+        files: ^frontend/.*\.(js|jsx|ts|tsx|vue|scss|css)$
+        pass_filenames: false

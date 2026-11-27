@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start DB services",
+      "type": "shell",
+      "command": "docker compose -f ${workspaceFolder}/../docker-compose.dev.yml --env-file ${workspaceFolder}/../.env.dev up postgres redis -d",
+      "problemMatcher": []
+    }
+  ]
+}

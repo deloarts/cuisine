@@ -1,0 +1,35 @@
+export default {
+  oauth: {
+    title: 'App verbinden',
+    loading: 'Die Anfrage wird geprüft …',
+    asks: '{name} möchte sich mit deinem Kochbuch verbinden',
+    returnsTo: 'Kehrt zurück zu {host}',
+    intro: 'Wenn du zustimmst, kann die App in Cuisine für dich arbeiten, mit deinen Berechtigungen oder weniger.',
+    mayLabel: 'Die App darf',
+    scopes: {
+      use_mcp: 'Das Kochbuch lesen',
+      write_recipes: 'Rezeptentwürfe anlegen',
+      write_ingredients: 'Fehlende Zutaten ergänzen',
+    },
+    scopeHints: {
+      use_mcp: 'Die Rezepte, die du sehen kannst, sowie Zutaten, Tags und Einheiten suchen und lesen.',
+      write_recipes: 'Importierte Rezepte kommen als Entwürfe, die du selbst prüfst und veröffentlichst.',
+      write_ingredients: 'Zutaten, die im Katalog fehlen, werden als Entwürfe angelegt.',
+    },
+    safety: 'Nichts, was die App tut, veröffentlicht oder löscht etwas. Du kannst sie jederzeit unter Konto, KI-Agenten trennen.',
+    allow: 'Zustimmen',
+    deny: 'Ablehnen',
+    consentTitle: 'Einwilligung für KI-Agenten',
+    consentText: 'Um eine App zu verbinden, brauchst du deine Einwilligung, dass KI-Agenten für dich handeln dürfen. Du kannst sie jederzeit in deinem Konto widerrufen; das trennt auch alle Apps.',
+    consentAndContinue: 'Einwilligen und weiter',
+    backHome: 'Zurück zum Kochbuch',
+    errors: {
+      generic: 'Diese Anfrage konnte nicht geprüft werden.',
+      incomplete: 'Dieser Link ist unvollständig. Starte die Verbindung in der App neu.',
+      OAuthDisabledError: 'Das Verbinden von Apps ist in diesem Kochbuch ausgeschaltet.',
+      AgentAccessDisabledError: 'KI-Agenten sind in diesem Kochbuch ausgeschaltet.',
+      PermissionDeniedError: 'Dein Konto darf keine KI-Agenten verbinden. Bitte eine Administratorin oder einen Administrator um die Berechtigung.',
+      SystemUserProtectedError: 'Das Administrationskonto kann keine Apps verbinden. Melde dich mit deinem persönlichen Konto an.',
+    },
+  },
+}

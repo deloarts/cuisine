@@ -1,0 +1,266 @@
+# Publishes a release when its release PR is merged into main. The release
+# PR comes from scripts/release_start.sh on a branch release/X.Y.Z, which
+# already bumped both version files and opened the CHANGELOG section. This
+# workflow checks that once more, builds both images and pushes them to GHCR
+# as the release candidate sha-<commit>, starts the candidate on an empty
+# database (scripts/smoke_release_images.sh), and only then tags the merge
+# commit vX.Y.Z, retags the tested digests as vX.Y.Z, vX.Y and latest, and
+# creates the GitHub release from the CHANGELOG section. docs/RELEASING.md
+# has the flow.
+
+name: Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.info.outputs.version }}
+      minor: ${{ steps.info.outputs.minor }}
+      sha: ${{ steps.info.outputs.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+      - name: Derive version
+        id: info
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          version="${HEAD_REF#release/}"
+          {
+            echo "version=${version}"
+            echo "minor=v${version%.*}"
+            echo "sha=${MERGE_SHA}"
+          } >> "$GITHUB_OUTPUT"
+      - name: Check version files, CHANGELOG and tag
+        run: scripts/check_release_version.sh "${{ steps.info.outputs.version }}"
+
+  # Builds both images from the merge commit and pushes them under the
+  # immutable candidate tag sha-<commit> only. Nothing a deployment pulls
+  # points at them until the smoke test passed. Each tag is an image index
+  # for linux/amd64 and linux/arm64 (a Raspberry Pi), so a host pulls its
+  # own platform under the same name. arm64 builds under QEMU, because the
+  # repository is private and GitHub's arm64 runners are free only for
+  # public ones.
+  images:
+    needs: guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - component: backend
+            context: backend
+            dockerfile: backend/docker/backend.Dockerfile
+            target: prod
+          - component: frontend
+            context: frontend
+            dockerfile: frontend/docker/frontend.Dockerfile
+            target: ""
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ needs.guard.outputs.sha }}
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        with:
+          images: ghcr.io/${{ github.repository }}/${{ matrix.component }}
+          tags: |
+            type=raw,value=sha-${{ needs.guard.outputs.sha }}
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.component }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}
+
+  # Pins the candidate by digest, so the smoke test and the retag below act
+  # on exactly the images that were built, whatever happens to the tag.
+  resolve:
+    needs: [guard, images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      backend: ${{ steps.digests.outputs.backend }}
+      frontend: ${{ steps.digests.outputs.frontend }}
+    steps:
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Resolve the candidate's digests
+        id: digests
+        env:
+          IMAGE_ROOT: ghcr.io/${{ github.repository }}
+          CANDIDATE: ${{ needs.guard.outputs.sha }}
+        run: |
+          for component in backend frontend; do
+            repository="$IMAGE_ROOT/$component"
+            digest="$(docker buildx imagetools inspect "$repository:sha-$CANDIDATE" --format '{{.Manifest.Digest}}')"
+            echo "$component: $repository@$digest"
+            echo "$component=$repository@$digest" >> "$GITHUB_OUTPUT"
+          done
+
+  # Starts the candidate's images with the release docker-compose.yml on an
+  # empty Postgres and Redis before anything is tagged or published: the
+  # entrypoint must migrate the database, the backend must report this
+  # version and be ready, and the frontend must serve the app and reach the
+  # backend. See scripts/smoke_release_images.sh. It runs once per platform;
+  # the arm64 run starts the whole stack under QEMU, which is slow but
+  # proves the arm64 images boot.
+  smoke:
+    needs: [guard, resolve]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ needs.guard.outputs.sha }}
+      - if: matrix.platform == 'linux/arm64'
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+        with:
+          platforms: arm64
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Start the images on an empty database
+        env:
+          BACKEND: ${{ needs.resolve.outputs.backend }}
+          FRONTEND: ${{ needs.resolve.outputs.frontend }}
+          VERSION: ${{ needs.guard.outputs.version }}
+          SMOKE_PLATFORM: ${{ matrix.platform }}
+          SMOKE_TIMEOUT: ${{ matrix.platform == 'linux/arm64' && '1500' || '600' }}
+        run: scripts/smoke_release_images.sh "$BACKEND" "$FRONTEND" "$VERSION"
+
+  tag:
+    needs: [guard, smoke]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ needs.guard.outputs.sha }}
+      - name: Create and push tag
+        env:
+          VERSION: ${{ needs.guard.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v$VERSION" -m "v$VERSION"
+          git push origin "v$VERSION"
+
+  # Retags the smoke-tested digests; --prefer-index=false copies each image
+  # index as it is, with both platforms, so every release tag names the very
+  # digest the candidate had, which the last step confirms.
+  publish:
+    needs: [guard, resolve, tag]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Retag the candidate's digests
+        env:
+          BACKEND: ${{ needs.resolve.outputs.backend }}
+          FRONTEND: ${{ needs.resolve.outputs.frontend }}
+          VERSION: ${{ needs.guard.outputs.version }}
+          MINOR: ${{ needs.guard.outputs.minor }}
+        run: |
+          for source in "$BACKEND" "$FRONTEND"; do
+            repository="${source%@*}"
+            digest="${source#*@}"
+            docker buildx imagetools create --prefer-index=false \
+              --tag "$repository:v$VERSION" \
+              --tag "$repository:$MINOR" \
+              --tag "$repository:latest" \
+              "$source"
+            for tag in "v$VERSION" "$MINOR" latest; do
+              published="$(docker buildx imagetools inspect "$repository:$tag" --format '{{.Manifest.Digest}}')"
+              if [[ "$published" != "$digest" ]]; then
+                echo "::error::$repository:$tag is $published, not the tested $digest." >&2
+                exit 1
+              fi
+              echo "$repository:$tag -> $digest"
+            done
+          done
+
+  github-release:
+    needs: [guard, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ needs.guard.outputs.sha }}
+      - name: Extract CHANGELOG section
+        env:
+          VERSION: ${{ needs.guard.outputs.version }}
+        run: |
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+      - uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          tag_name: v${{ needs.guard.outputs.version }}
+          name: v${{ needs.guard.outputs.version }}
+          body_path: release-notes.md
