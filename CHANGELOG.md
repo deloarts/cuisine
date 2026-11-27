@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- The first start of a new instance no longer fails on slower hosts such as a Raspberry Pi, where several backend workers seeded the empty database at once.
+
 ## [0.1.0] - 2026-11-27
 
 The first release.
