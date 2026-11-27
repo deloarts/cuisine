@@ -1,0 +1,27 @@
+// The cell and dialog styles the resource tabs share.
+
+.resource-name {
+  font-weight: 700;
+}
+
+.swatch {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  background: var(--p-content-border-color);
+}
+
+.dialog-form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.resource-dialog {
+  width: min(var(--dialog-width-md), 100vw - 2 * var(--space-4));
+}

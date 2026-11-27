@@ -1,0 +1,1155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cuisine:format:cuisine-recipes:1",
+  "title": "cuisine-recipes version 1",
+  "type": "object",
+  "description": "Recipes with the catalogue entries and images they use. A sub-recipe comes before the recipes that use it.",
+  "properties": {
+    "format": {
+      "const": "cuisine-recipes"
+    },
+    "version": {
+      "const": 1
+    },
+    "exported_at": {
+      "type": "string"
+    },
+    "instance_id": {
+      "description": "The instance id of the exporting instance.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "recipes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RecipeEntryV1"
+      }
+    },
+    "catalogue": {
+      "$ref": "#/$defs/CatalogueSectionV1"
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/FileEntryV1"
+      }
+    }
+  },
+  "required": [
+    "format",
+    "version",
+    "recipes"
+  ],
+  "$defs": {
+    "CatalogueSectionV1": {
+      "type": "object",
+      "description": "The catalogue entries a `cuisine-recipes` document refers to.",
+      "properties": {
+        "units": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/UnitEntryV1"
+          }
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/TagEntryV1"
+          }
+        },
+        "ingredients": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/IngredientEntryV1"
+          }
+        },
+        "equipment": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/EquipmentEntryV1"
+          }
+        }
+      }
+    },
+    "ConversionV1": {
+      "type": "object",
+      "properties": {
+        "unit_id": {
+          "description": "A key of the document's units.",
+          "type": "string"
+        },
+        "grams": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "unit_id",
+        "grams"
+      ]
+    },
+    "EquipmentEntryV1": {
+      "type": "object",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "description": "cookware, bakeware, appliance or utensil.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "names": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "aliases": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "basic": {
+          "type": "boolean"
+        }
+      }
+    },
+    "EquipmentLineV1": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The line's public id at the source.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "equipment_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notes": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/NoteV1"
+          }
+        }
+      }
+    },
+    "FileEntryV1": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "The member of the zip that holds the bytes.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "content_type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    },
+    "IngredientEntryV1": {
+      "type": "object",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "original_locale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "names": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/IngredientNameV1"
+          }
+        },
+        "aliases": {
+          "description": "Other names per locale.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "category": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NamedRefV1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "family": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NamedRefV1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nutrition": {
+          "$ref": "#/$defs/NutritionV1"
+        },
+        "extended_nutrition": {
+          "description": "Extended nutrients per 100 g by key, such as vitamin_c_mg.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "season_months": {
+          "description": "Months 1 to 12 in season; empty is not seasonal.",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "density_g_per_ml": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conversions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConversionV1"
+          }
+        },
+        "allergens": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "diet_markers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "IngredientLineV1": {
+      "type": "object",
+      "description": "A catalogue ingredient or a sub-recipe, exactly one of them.",
+      "properties": {
+        "id": {
+          "description": "The line's public id at the source.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ingredient_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sub_recipe_id": {
+          "description": "The id of another recipe of the document.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notes": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/NoteV1"
+          }
+        }
+      }
+    },
+    "IngredientNameV1": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "plural_name": {
+          "type": "string"
+        }
+      }
+    },
+    "NamedRefV1": {
+      "type": "object",
+      "description": "A category or family an ingredient belongs to, by seed key and names.",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "names": {
+          "description": "Name per locale.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "description": "Its public id on the exporting instance.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "NoteV1": {
+      "type": "object",
+      "properties": {
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "NutritionV1": {
+      "type": "object",
+      "description": "Per 100 g: energy in kcal, everything else in grams. Null is unknown.",
+      "properties": {
+        "kcal": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protein": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fat": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "saturated_fat": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "carbohydrates": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sugar": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fibre": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "salt": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "RecipeContentV1": {
+      "type": "object",
+      "description": "The recipe's content in every language. Status, visibility, shares and the personal layer are never part of it.",
+      "properties": {
+        "schema_version": {
+          "description": "Always 1; kept for early readers.",
+          "type": "integer"
+        },
+        "original_locale": {
+          "type": "string"
+        },
+        "translations": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/RecipeTextV1"
+          }
+        },
+        "base_servings": {
+          "type": "integer"
+        },
+        "prep_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cook_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rest_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "difficulty": {
+          "description": "easy, medium or hard.",
+          "type": "string"
+        },
+        "cover_image_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tag_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "yield_amount": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "yield_unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StepV1"
+          }
+        },
+        "ingredients": {
+          "description": "The ingredient list declared for the whole recipe, in its order. A reader derives the recipe's list as the larger of it and what the steps use; without it the steps alone count.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IngredientLineV1"
+          }
+        },
+        "names": {
+          "$ref": "#/$defs/ReferenceNamesV1"
+        }
+      },
+      "required": [
+        "original_locale"
+      ]
+    },
+    "RecipeEntryV1": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The recipe's public id at the source.",
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "snapshot": {
+          "$ref": "#/$defs/RecipeContentV1"
+        },
+        "variations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/VariationV1"
+          }
+        },
+        "author_name": {
+          "description": "The recipe author's display name, when the author shows it to paired instances; set in peering payloads only.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "author_avatar": {
+          "description": "The key in `files` of the recipe author's avatar, under the same rule as `author_name`; set in peering payloads only.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "snapshot"
+      ]
+    },
+    "RecipeTextV1": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tips": {
+          "type": "string"
+        }
+      }
+    },
+    "ReferenceNamesV1": {
+      "type": "object",
+      "description": "The names per locale of every record the recipe refers to, by id, so an importer can name what it could not place.",
+      "properties": {
+        "ingredients": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "units": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "equipment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "recipes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "StepTextV1": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "description": "Markdown with mentions such as @[Name](kind:id).",
+          "type": "string"
+        }
+      }
+    },
+    "StepV1": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The step's public id at the source.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "translations": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/StepTextV1"
+          }
+        },
+        "duration_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "image_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ingredients": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IngredientLineV1"
+          }
+        },
+        "equipment": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EquipmentLineV1"
+          }
+        }
+      }
+    },
+    "TagEntryV1": {
+      "type": "object",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "names": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "color": {
+          "description": "A hex colour such as #d97706.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "UnitEntryV1": {
+      "type": "object",
+      "properties": {
+        "seed_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "code": {
+          "description": "The stable unit code, such as g or tbsp.",
+          "type": "string"
+        },
+        "names": {
+          "description": "Name per locale.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "kind": {
+          "description": "mass, volume, count or other.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "to_base": {
+          "description": "Grams per unit for mass, millilitres for volume.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plural_names": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "abbreviations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "code"
+      ]
+    },
+    "VariationChangeV1": {
+      "type": "object",
+      "description": "One difference to the recipe. Steps are numbered from 1 as the recipe is in this document.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "description": "swap, add_line, remove_line, step_text or extra_step.",
+          "type": "string"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ingredient_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sub_recipe_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "to_ingredient_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keep_amount": {
+          "type": "boolean"
+        },
+        "note": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "duration_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/VariationLineV1"
+          }
+        },
+        "equipment": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/VariationEquipmentV1"
+          }
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "VariationEquipmentV1": {
+      "type": "object",
+      "properties": {
+        "equipment_id": {
+          "type": "string"
+        },
+        "count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "equipment_id"
+      ]
+    },
+    "VariationLineV1": {
+      "type": "object",
+      "properties": {
+        "ingredient_id": {
+          "type": "string"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ingredient_id"
+      ]
+    },
+    "VariationV1": {
+      "type": "object",
+      "description": "A variation of the recipe, written in one locale.",
+      "properties": {
+        "id": {
+          "description": "The variation's public id at the source.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "private": {
+          "description": "Only exported to its own author.",
+          "type": "boolean"
+        },
+        "author_name": {
+          "description": "The author's display name, when the author shows it.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "author_avatar": {
+          "description": "The key in `files` of the author's avatar, under the same rule as `author_name`; set in peering payloads only.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/VariationChangeV1"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "locale"
+      ]
+    }
+  }
+}

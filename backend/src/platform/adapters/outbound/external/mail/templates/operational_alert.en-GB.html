@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ instance_name }}: {{ title }}</title>
+  <style>
+    body { margin: 0; padding: 0; background: #f4f4f5; font-family: Arial, sans-serif; }
+    .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 6px; overflow: hidden; }
+    .header { background: #27272a; padding: 28px 36px; }
+    .header h1 { margin: 0; color: #ffffff; font-size: 22px; }
+    .body { padding: 28px 36px; color: #27272a; line-height: 1.6; }
+    .body p { margin: 0 0 16px; }
+    .footer { background: #f4f4f5; padding: 14px 36px; font-size: 12px; color: #71717a; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header"><h1>{{ title }}</h1></div>
+    <div class="body">
+      <p>{{ details }}</p>
+      <p>Open the admin area at {{ domain }} for details.</p>
+    </div>
+    <div class="footer">You get this mail because you are an alert recipient of {{ instance_name }}.</div>
+  </div>
+</body>
+</html>

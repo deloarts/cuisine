@@ -1,0 +1,143 @@
+[project]
+authors = [
+  {name = "Philip Delorenzo", email = "git@deloarts.com"},
+]
+description = "Cuisine backend"
+license = "LicenseRef-DAL-1.0.0"
+name = "cuisine-backend"
+readme = "README.md"
+requires-python = ">=3.13"
+version = "0.1.0"
+# The runtime dependencies stay in [tool.poetry.dependencies], where Poetry's
+# caret ranges live, so the [project] table declares them dynamic.
+dynamic = ["dependencies"]
+
+[tool.poetry.dependencies]
+python = "^3.13"
+
+# Web framework. A caret on a 0.x version caps at the next minor, and 0.x
+# minors of fastapi, uvicorn and uvicorn-worker can break, so each bump reads
+# the changelog first.
+fastapi = "^0.162"
+uvicorn = {version = "^0.54", extras = ["standard"]}
+uvicorn-worker = "^0.4"
+gunicorn = ">=26.2,<27"
+
+# Database. SQLAlchemy's asyncio extension runs on greenlet.
+alembic = "^1.20.1"
+psycopg = {version = "^3.3", extras = ["binary"]}
+sqlalchemy = ">=2.0.55,<2.1"
+greenlet = "^3.1"
+
+# Validation and settings
+pydantic = {version = "^2.10", extras = ["email"]}
+pydantic-settings = "^2.7"
+
+# Auth. bcrypt 5 raises on input over 72 bytes; hashing.py cuts the input.
+bcrypt = "^5.0"
+pyjwt = "^2.10"
+python-multipart = "^0.0.32"
+pyotp = "^2.9"
+webauthn = "^3.0"
+cryptography = "^50.0"
+
+# Login throttling, the TOTP replay guard and the live shopping list.
+redis = "^8.1"
+# The live shopping list stream (server-sent events).
+sse-starlette = "^3.4"
+
+# Mail
+aiosmtplib = "^5.1"
+
+# Images: re-encoding uploads to WebP and building thumbnails.
+pillow = "^13.0.0"
+
+# Outbound HTTP: the USDA FoodData Central lookup. A caret on 0.28 caps at
+# 0.29, since httpx minors have removed arguments before.
+httpx = "^0.28"
+
+# The MCP surface agents connect to. mcp 2.x ships its wire types as the
+# separate mcp-types package.
+mcp = "^2.3"
+pyyaml = "^6.0"
+psutil = "^7.2.2"
+boto3 = "^1.44.9"
+jinja2 = "^3.1.6"
+
+[tool.poetry.group.dev.dependencies]
+mypy = ">=2.4,<3"
+pre-commit = ">=4.7,<5"
+pytest = "^9.0.3"
+pytest-asyncio = "^1.4"
+pytest-cov = "^7.1.0"
+ruff = ">=0.17.2,<0.18"
+aiosqlite = "^0.21"
+pytest-xdist = "^3.8"
+debugpy = "^1.8.22"
+types-pyyaml = "^6.0"
+types-psutil = "^7.2.2.20261111"
+boto3-stubs = {extras = ["s3"], version = "^1.44.9"}
+jsonschema = "^4.26.0"
+types-jsonschema = "^4.26.0.20261006"
+
+[tool.poetry]
+packages = [{include = "src"}]
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+select = ["E", "F", "I", "B", "UP", "DTZ", "RET", "SIM", "PERF", "PTH", "RUF", "ASYNC"]
+ignore = ["RUF001", "RUF002", "RUF003", "UP042", "UP046", "UP047"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+known-first-party = ["src", "tests", "alembic"]
+split-on-trailing-comma = true
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+  "fastapi.Depends",
+  "fastapi.Query",
+  "fastapi.Path",
+  "fastapi.Body",
+  "fastapi.Cookie",
+  "fastapi.Header",
+  "fastapi.Form",
+  "fastapi.File",
+  "fastapi.Security",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["DTZ"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+explicit_package_bases = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["uvicorn_worker.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["src.platform.infrastructure.gunicorn_worker"]
+disallow_subclassing_any = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.coverage.report]
+fail_under = 80

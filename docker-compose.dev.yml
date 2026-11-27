@@ -1,0 +1,137 @@
+# ─────────────────────────────────────────────────────────────
+# Cuisine - development compose
+#
+# Two ways to use it (docs/DEVELOPMENT.md):
+#   * Host dev loop: start only the infrastructure,
+#       docker compose -f docker-compose.dev.yml --env-file .env.dev up postgres redis -d
+#     and run the backend and Vite on the host (make dev-backend, make dev-frontend).
+#   * Everything in containers: `up -d` builds the backend's dev stage with
+#     hot reload and serves the frontend from the Vite dev server.
+# Every published port binds to 127.0.0.1 only: the dev credentials are
+# well known and Redis has no password, so nothing here may be reachable
+# from the LAN. Running the stack on another machine needs an override file
+# that publishes the ports it wants elsewhere.
+# Redis data lives in ./.volumes (gitignored). Postgres uses the named volume
+# postgres_data instead, because initdb must chmod its data directory, which
+# a bind mount on a Windows drive under WSL (/mnt/...) refuses.
+# ─────────────────────────────────────────────────────────────
+name: cuisine-dev
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: docker/backend.Dockerfile
+      target: dev
+    restart: unless-stopped
+    env_file: .env.dev
+    environment:
+      # The dev env file points at localhost for the host loop; inside the
+      # stack the services are reached by name.
+      DATABASE__URL: postgresql+psycopg://${POSTGRES_USER:-cuisine}:${POSTGRES_PASSWORD:-cuisine}@postgres:5432/${POSTGRES_DB:-cuisine}
+      REDIS__URL: redis://redis:6379/0
+    volumes:
+      - ./backend/src:/app/src # hot reload
+      - ./backend/alembic:/app/alembic # migration changes reflected live
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      uvicorn src.bootstrap.main:app --host 0.0.0.0 --port 3000 --reload
+      --timeout-graceful-shutdown 5
+    networks:
+      - internal
+      - external
+
+  frontend:
+    image: node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0"
+    environment:
+      VITE_API_URL: http://localhost:3000
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - external
+
+  postgres:
+    image: postgres:16-alpine@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685
+    restart: unless-stopped
+    env_file: .env.dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # 5433 and 6380 on the host, so the stack runs next to Glados's dev stack.
+      - "127.0.0.1:5433:5432" # local DB clients (DBeaver, psql)
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - ./.volumes/redis:/data
+    ports:
+      - "127.0.0.1:6380:6379" # redis-cli
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  # A local SMTP catcher: point the mail settings at host `mailpit`,
+  # port 1025, security none, and read the mail on http://localhost:8025.
+  mailpit:
+    image: axllent/mailpit:v1.27
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+    networks:
+      - internal
+
+  # The `seaweedfs` storage provider for development (--profile seaweedfs).
+  # Without nginx in front, the browser loads presigned URLs straight from
+  # port 8333, so the dev env sets STORAGE__PUBLIC_ENDPOINT_URL to it.
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.48@sha256:4e61d15fd35994cb1e43e1e553dff106794841fd9a99ade2fc8c8bfce4d7872d
+    restart: unless-stopped
+    profiles: [ seaweedfs ]
+    command: mini -dir=/data -bucket=objects -s3.autoCreateBucket=false -admin.ui=false
+    environment:
+      AWS_ACCESS_KEY_ID: ${SEAWEEDFS_ACCESS_KEY:-cuisine}
+      AWS_SECRET_ACCESS_KEY: ${SEAWEEDFS_SECRET_KEY:-cuisine-dev-seaweedfs-secret}
+    volumes:
+      - seaweedfs_data:/data
+    ports:
+      - "127.0.0.1:8333:8333"
+    networks:
+      - internal
+
+networks:
+  internal:
+  external:
+
+volumes:
+  postgres_data:
+  frontend_node_modules:
+  seaweedfs_data:

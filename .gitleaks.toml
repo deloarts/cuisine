@@ -1,0 +1,31 @@
+# Repository config for gitleaks, read by CI's gitleaks job and the
+# pre-commit hook. It keeps the default rule set and only adds allowlists
+# for known false positives.
+
+[extend]
+useDefault = true
+
+# The env templates carry sample values ("change_me", dev-only keys) that
+# the boot guard refuses in production.
+[[allowlists]]
+description = "Sample values in the env templates"
+paths = ['''^\.env(\.dev)?\.example$''']
+
+# The test suite's throwaway keys and passwords.
+[[allowlists]]
+description = "Test fixtures"
+paths = ['''^backend/tests/''']
+
+# The frontend specs' fixtures, for the same reason.
+[[allowlists]]
+description = "Frontend test fixtures"
+paths = ['''^frontend/src/.*/__tests__/''']
+
+# Every fact in the ingredient facts carries a slug as its key, which the
+# generic API key rule reads as a secret. Only slugs are allowed, and only in
+# that file.
+[[allowlists]]
+description = "Slug keys of the ingredient facts"
+condition = "AND"
+paths = ['''^backend/src/bootstrap/data/ingredient_facts\.yaml$''']
+regexes = ['''^[a-z0-9]+(?:-[a-z0-9]+)+$''']

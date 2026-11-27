@@ -1,0 +1,35 @@
+export default {
+  oauth: {
+    title: 'Connect an app',
+    loading: 'Checking the request…',
+    asks: '{name} wants to connect to your cookbook',
+    returnsTo: 'Returns to {host}',
+    intro: 'If you allow it, the app can work in Cuisine for you, with your permissions or fewer.',
+    mayLabel: 'The app may',
+    scopes: {
+      use_mcp: 'Read the cookbook',
+      write_recipes: 'Create recipe drafts',
+      write_ingredients: 'Add missing ingredients',
+    },
+    scopeHints: {
+      use_mcp: 'Search and read the recipes you can see, and the ingredients, tags and units.',
+      write_recipes: 'Imported recipes arrive as drafts you review and publish yourself.',
+      write_ingredients: 'Ingredients the catalogue lacks are added as drafts.',
+    },
+    safety: 'Nothing the app does publishes or deletes anything. You can disconnect it at any time under Account, AI agents.',
+    allow: 'Allow',
+    deny: 'Decline',
+    consentTitle: 'Consent for AI agents',
+    consentText: 'Connecting an app needs your consent that AI agents may act for you. You can withdraw it at any time on your account page, which also disconnects every app.',
+    consentAndContinue: 'Agree and continue',
+    backHome: 'Back to the cookbook',
+    errors: {
+      generic: 'This request could not be checked.',
+      incomplete: 'This link is incomplete. Start the connection again from the app.',
+      OAuthDisabledError: 'Connecting apps is switched off in this cookbook.',
+      AgentAccessDisabledError: 'AI agents are switched off in this cookbook.',
+      PermissionDeniedError: 'Your account may not connect AI agents. Ask an administrator for the permission.',
+      SystemUserProtectedError: 'The administrator account cannot connect apps. Sign in with your personal account.',
+    },
+  },
+}

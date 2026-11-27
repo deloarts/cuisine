@@ -1,0 +1,1305 @@
+# The kitchen equipment every instance is seeded with: cookware, bakeware,
+# appliances and utensils that recipe steps can name. Hand-edited.
+#
+# Fields: key (stable, never renamed), kind (cookware, bakeware, appliance,
+# utensil), names per locale (Austrian German as the de-AT main name),
+# aliases per locale (other names that search, pickers and imports match:
+# German German and regional variants in de-AT, US names in en-GB; unique
+# per locale across every equipment, ingredient and family name and alias,
+# ignoring case and diacritics), icon (optional, an icon name of @mdi/font
+# without the mdi- prefix), basic (optional, true for the everyday items
+# most kitchens have, pre-ticked when a user sets up their kitchen).
+# Inserted once by key, never updated or brought back.
+
+# cookware
+- key: saucepan
+  kind: cookware
+  names:
+    en-GB: saucepan
+    de-AT: Topf
+  aliases:
+    en-GB: [pot, cooking pot]
+    de-AT: [Kochtopf]
+  icon: pot
+  basic: true
+- key: stockpot
+  kind: cookware
+  names:
+    en-GB: stockpot
+    de-AT: Suppentopf
+  aliases:
+    en-GB: [stock pot, soup pot]
+    de-AT: [großer Topf]
+  icon: pot-steam
+- key: frying_pan
+  kind: cookware
+  names:
+    en-GB: frying pan
+    de-AT: Pfanne
+  aliases:
+    en-GB: [skillet, fry pan]
+    de-AT: [Bratpfanne]
+  icon: pan
+  basic: true
+- key: grill_pan
+  kind: cookware
+  names:
+    en-GB: griddle pan
+    de-AT: Grillpfanne
+  aliases:
+    en-GB: [grill pan]
+    de-AT: [Rillenpfanne]
+  icon: pan
+- key: crepe_pan
+  kind: cookware
+  names:
+    en-GB: crêpe pan
+    de-AT: Palatschinkenpfanne
+  aliases:
+    en-GB: [pancake pan]
+    de-AT: [Crêpepfanne]
+  icon: pan
+- key: wok
+  kind: cookware
+  names:
+    en-GB: wok
+    de-AT: Wok
+  aliases:
+    en-GB: []
+    de-AT: [Wokpfanne]
+  icon: pan
+- key: casserole_pot
+  kind: cookware
+  names:
+    en-GB: casserole pot
+    de-AT: Schmortopf
+  aliases:
+    en-GB: [Dutch oven, cocotte]
+    de-AT: [Bräter, Gusseisentopf]
+  icon: pot
+- key: roasting_tin
+  kind: cookware
+  names:
+    en-GB: roasting tin
+    de-AT: Bratenreine
+  aliases:
+    en-GB: [roasting pan]
+    de-AT: [Reindl, Bratenform]
+  icon: rectangle-outline
+- key: pressure_cooker
+  kind: cookware
+  names:
+    en-GB: pressure cooker
+    de-AT: Schnellkochtopf
+  aliases:
+    en-GB: []
+    de-AT: [Dampfkochtopf]
+  icon: pot-steam
+- key: steamer_basket
+  kind: cookware
+  names:
+    en-GB: steamer basket
+    de-AT: Dämpfeinsatz
+  aliases:
+    en-GB: [steamer insert]
+    de-AT: [Dämpfkorb, Dampfgareinsatz]
+  icon: pot-steam
+- key: saute_pan
+  kind: cookware
+  names:
+    en-GB: sauté pan
+    de-AT: Schwenkpfanne
+  aliases:
+    en-GB: [saute pan, sauteuse, deep frying pan]
+    de-AT: [Sauteuse, Sautépfanne]
+  icon: pan
+- key: milk_pan
+  kind: cookware
+  names:
+    en-GB: milk pan
+    de-AT: Milchtopf
+  aliases:
+    en-GB: [small saucepan]
+    de-AT: [Milchreindl, Stieltopf]
+  icon: pot
+- key: double_boiler
+  kind: cookware
+  names:
+    en-GB: bain-marie
+    de-AT: Wasserbad
+  aliases:
+    en-GB: [double boiler, water bath]
+    de-AT: [Bain-Marie, Wasserbadtopf]
+  icon: pot-steam-outline
+- key: clay_pot
+  kind: cookware
+  names:
+    en-GB: clay pot
+    de-AT: Tontopf
+  aliases:
+    en-GB: [clay baker, chicken brick, Römertopf]
+    de-AT: [Römertopf, Tonbräter]
+  icon: pot
+- key: tagine
+  kind: cookware
+  names:
+    en-GB: tagine
+    de-AT: Tajine
+  aliases:
+    en-GB: [tajine, tagine pot]
+    de-AT: [Tagine, Tajinetopf]
+  icon: pot
+- key: paella_pan
+  kind: cookware
+  names:
+    en-GB: paella pan
+    de-AT: Paellapfanne
+  aliases:
+    en-GB: [paellera]
+    de-AT: [Paellera]
+  icon: pan
+- key: moka_pot
+  kind: cookware
+  names:
+    en-GB: moka pot
+    de-AT: Espressokocher
+  aliases:
+    en-GB: [stovetop espresso maker, Bialetti]
+    de-AT: [Mokkakanne, Caffettiera, Bialetti]
+  icon: coffee-maker-outline
+
+# bakeware
+- key: baking_tray
+  kind: bakeware
+  names:
+    en-GB: baking tray
+    de-AT: Backblech
+  aliases:
+    en-GB: [sheet pan, baking sheet, cookie sheet]
+    de-AT: []
+  icon: rectangle-outline
+  basic: true
+- key: springform
+  kind: bakeware
+  names:
+    en-GB: springform tin
+    de-AT: Tortenform
+  aliases:
+    en-GB: [springform pan, springform]
+    de-AT: [Springform]
+  icon: cake
+- key: loaf_tin
+  kind: bakeware
+  names:
+    en-GB: loaf tin
+    de-AT: Kastenform
+  aliases:
+    en-GB: [loaf pan]
+    de-AT: [Kastenkuchenform]
+  icon: rectangle-outline
+- key: bundt_tin
+  kind: bakeware
+  names:
+    en-GB: Bundt tin
+    de-AT: Gugelhupfform
+  aliases:
+    en-GB: [Bundt pan, Bundt cake tin]
+    de-AT: [Guglhupfform, Napfkuchenform]
+  icon: cake-variant
+- key: muffin_tin
+  kind: bakeware
+  names:
+    en-GB: muffin tin
+    de-AT: Muffinform
+  aliases:
+    en-GB: [muffin pan, cupcake tin]
+    de-AT: [Muffinblech]
+  icon: cupcake
+- key: tart_tin
+  kind: bakeware
+  names:
+    en-GB: tart tin
+    de-AT: Tarteform
+  aliases:
+    en-GB: [tart pan, quiche dish]
+    de-AT: [Quicheform]
+  icon: circle-outline
+- key: gratin_dish
+  kind: bakeware
+  names:
+    en-GB: ovenproof dish
+    de-AT: Auflaufform
+  aliases:
+    en-GB: [baking dish, gratin dish]
+    de-AT: [Gratinform, Ofenform]
+  icon: square-outline
+- key: pizza_stone
+  kind: bakeware
+  names:
+    en-GB: pizza stone
+    de-AT: Pizzastein
+  aliases:
+    en-GB: [baking stone]
+    de-AT: [Backstein]
+  icon: pizza
+- key: baking_paper
+  kind: bakeware
+  names:
+    en-GB: baking paper
+    de-AT: Backpapier
+  aliases:
+    en-GB: [parchment paper, greaseproof paper]
+    de-AT: []
+  icon: layers-outline
+  basic: true
+- key: cooling_rack
+  kind: bakeware
+  names:
+    en-GB: cooling rack
+    de-AT: Kuchengitter
+  aliases:
+    en-GB: [wire rack]
+    de-AT: [Abkühlgitter]
+  icon: layers-outline
+- key: proving_basket
+  kind: bakeware
+  names:
+    en-GB: proving basket
+    de-AT: Gärkörbchen
+  aliases:
+    en-GB: [banneton, proofing basket]
+    de-AT: [Simperl, Gärkorb]
+  icon: bowl-outline
+- key: pie_dish
+  kind: bakeware
+  names:
+    en-GB: pie dish
+    de-AT: Pieform
+  aliases:
+    en-GB: [pie tin, pie plate, pie pan]
+    de-AT: [Pie-Form]
+  icon: circle-outline
+- key: ramekin
+  kind: bakeware
+  names:
+    en-GB: ramekin
+    de-AT: Souffléförmchen
+  aliases:
+    en-GB: [soufflé dish, ramequin]
+    de-AT: [Ramekin, Auflaufförmchen, Förmchen]
+  icon: cup-outline
+- key: dessert_ring
+  kind: bakeware
+  names:
+    en-GB: dessert ring
+    de-AT: Tortenring
+  aliases:
+    en-GB: [cake ring, mousse ring, food ring]
+    de-AT: [Backring, Dessertring, Speisering]
+  icon: circle-outline
+- key: square_cake_tin
+  kind: bakeware
+  names:
+    en-GB: square cake tin
+    de-AT: quadratische Backform
+  aliases:
+    en-GB: [square baking tin, square cake pan, brownie tin]
+    de-AT: [Brownieform, eckige Backform]
+  icon: square-outline
+- key: sheet_cake_tin
+  kind: bakeware
+  names:
+    en-GB: traybake tin
+    de-AT: Blechkuchenform
+  aliases:
+    en-GB: [sheet cake pan, deep baking tray]
+    de-AT: [tiefes Backblech, Fettpfanne]
+  icon: rectangle-outline
+- key: rehruecken_tin
+  kind: bakeware
+  names:
+    en-GB: Rehrücken tin
+    de-AT: Rehrückenform
+  aliases:
+    en-GB: [Rehruecken tin, ridged loaf tin]
+    de-AT: [Rehrückenbackform]
+  icon: cake-layered
+- key: silicone_baking_mat
+  kind: bakeware
+  names:
+    en-GB: silicone baking mat
+    de-AT: Silikonbackmatte
+  aliases:
+    en-GB: [Silpat, baking mat]
+    de-AT: [Backmatte, Dauerbackfolie]
+  icon: layers-outline
+- key: chocolate_mould
+  kind: bakeware
+  names:
+    en-GB: chocolate mould
+    de-AT: Pralinenform
+  aliases:
+    en-GB: [chocolate mold, praline mould]
+    de-AT: [Schokoladenform, Pralinenmodel]
+  icon: candy-outline
+
+# appliance
+- key: oven
+  kind: appliance
+  names:
+    en-GB: oven
+    de-AT: Backrohr
+  aliases:
+    en-GB: []
+    de-AT: [Backofen, Ofen]
+  icon: stove
+  basic: true
+- key: hob
+  kind: appliance
+  names:
+    en-GB: hob
+    de-AT: Herd
+  aliases:
+    en-GB: [stovetop, stove, range, cooktop]
+    de-AT: [Kochfeld, Herdplatte]
+  icon: stove
+  basic: true
+- key: oven_grill
+  kind: appliance
+  names:
+    en-GB: oven grill
+    de-AT: Grillfunktion
+  aliases:
+    en-GB: [broiler, grill]
+    de-AT: [Ofengrill]
+  icon: grill
+- key: barbecue
+  kind: appliance
+  names:
+    en-GB: barbecue
+    de-AT: Griller
+  aliases:
+    en-GB: [BBQ, outdoor grill]
+    de-AT: [Grill, Holzkohlegrill, Gasgrill]
+  icon: grill-outline
+- key: microwave
+  kind: appliance
+  names:
+    en-GB: microwave
+    de-AT: Mikrowelle
+  aliases:
+    en-GB: [microwave oven]
+    de-AT: [Mikrowellenherd]
+  icon: microwave
+- key: stand_mixer
+  kind: appliance
+  names:
+    en-GB: stand mixer
+    de-AT: Küchenmaschine
+  aliases:
+    en-GB: [kitchen machine]
+    de-AT: [Rührmaschine]
+  icon: bowl-mix
+- key: hand_mixer
+  kind: appliance
+  names:
+    en-GB: hand mixer
+    de-AT: Handmixer
+  aliases:
+    en-GB: [electric whisk, electric hand mixer]
+    de-AT: [Handrührgerät, Rührgerät]
+  icon: bowl-mix-outline
+- key: blender
+  kind: appliance
+  names:
+    en-GB: blender
+    de-AT: Standmixer
+  aliases:
+    en-GB: [liquidiser]
+    de-AT: [Mixer, Blender]
+  icon: blender
+- key: stick_blender
+  kind: appliance
+  names:
+    en-GB: stick blender
+    de-AT: Stabmixer
+  aliases:
+    en-GB: [immersion blender, hand blender]
+    de-AT: [Pürierstab, Zauberstab]
+  icon: blender-outline
+- key: food_processor
+  kind: appliance
+  names:
+    en-GB: food processor
+    de-AT: Zerkleinerer
+  aliases:
+    en-GB: [chopper]
+    de-AT: [Multizerkleinerer, Food Processor, Cutter]
+  icon: blender
+- key: toaster
+  kind: appliance
+  names:
+    en-GB: toaster
+    de-AT: Toaster
+  aliases:
+    en-GB: []
+    de-AT: []
+  icon: toaster
+- key: kettle
+  kind: appliance
+  names:
+    en-GB: kettle
+    de-AT: Wasserkocher
+  aliases:
+    en-GB: [electric kettle]
+    de-AT: []
+  icon: kettle
+- key: slow_cooker
+  kind: appliance
+  names:
+    en-GB: slow cooker
+    de-AT: Schongarer
+  aliases:
+    en-GB: [crockpot]
+    de-AT: [Slow Cooker]
+  icon: pot
+- key: air_fryer
+  kind: appliance
+  names:
+    en-GB: air fryer
+    de-AT: Heißluftfritteuse
+  aliases:
+    en-GB: []
+    de-AT: [Airfryer]
+  icon: fan
+- key: waffle_iron
+  kind: appliance
+  names:
+    en-GB: waffle iron
+    de-AT: Waffeleisen
+  aliases:
+    en-GB: [waffle maker]
+    de-AT: []
+  icon: square-outline
+- key: mincer
+  kind: appliance
+  names:
+    en-GB: mincer
+    de-AT: Fleischwolf
+  aliases:
+    en-GB: [meat grinder]
+    de-AT: [Faschiermaschine]
+  icon: food-drumstick
+- key: pasta_machine
+  kind: appliance
+  names:
+    en-GB: pasta machine
+    de-AT: Nudelmaschine
+  aliases:
+    en-GB: [pasta maker]
+    de-AT: [Pastamaschine]
+  icon: pasta
+- key: rice_cooker
+  kind: appliance
+  names:
+    en-GB: rice cooker
+    de-AT: Reiskocher
+  aliases:
+    en-GB: []
+    de-AT: []
+  icon: rice
+- key: sous_vide
+  kind: appliance
+  names:
+    en-GB: sous-vide cooker
+    de-AT: Sous-vide-Garer
+  aliases:
+    en-GB: [sous vide, immersion circulator, sous-vide stick]
+    de-AT: [Sous-vide-Stick, Vakuumgarer]
+  icon: thermometer-water
+- key: deep_fryer
+  kind: appliance
+  names:
+    en-GB: deep fat fryer
+    de-AT: Fritteuse
+  aliases:
+    en-GB: [deep fryer, chip pan, fryer]
+    de-AT: [Friteuse, Fritöse]
+  icon: french-fries
+- key: ice_cream_maker
+  kind: appliance
+  names:
+    en-GB: ice cream maker
+    de-AT: Eismaschine
+  aliases:
+    en-GB: [ice cream machine, sorbetière]
+    de-AT: [Speiseeismaschine, Eiscrememaschine]
+  icon: ice-cream
+- key: juicer
+  kind: appliance
+  names:
+    en-GB: juice extractor
+    de-AT: Entsafter
+  aliases:
+    en-GB: [centrifugal juicer, slow juicer, electric juicer]
+    de-AT: [Saftzentrifuge, Slow Juicer]
+  icon: food-apple
+- key: bread_maker
+  kind: appliance
+  names:
+    en-GB: bread maker
+    de-AT: Brotbackautomat
+  aliases:
+    en-GB: [bread machine, breadmaker]
+    de-AT: [Brotbackmaschine]
+  icon: bread-slice
+- key: multicooker
+  kind: appliance
+  names:
+    en-GB: multicooker
+    de-AT: Küchenmaschine mit Kochfunktion
+  aliases:
+    en-GB: [thermo cooker, cooking food processor, Thermomix, Monsieur Cuisine]
+    de-AT: [Multikocher, Thermomix, Monsieur Cuisine, Thermi]
+  icon: pot-mix
+- key: fondue_set
+  kind: appliance
+  names:
+    en-GB: fondue set
+    de-AT: Fondue-Set
+  aliases:
+    en-GB: [fondue pot]
+    de-AT: [Fonduetopf, Fondueset]
+  icon: fire
+- key: raclette_grill
+  kind: appliance
+  names:
+    en-GB: raclette grill
+    de-AT: Raclettegrill
+  aliases:
+    en-GB: [raclette machine, raclette set]
+    de-AT: [Raclettegerät, Raclette-Set]
+  icon: grill
+- key: spice_grinder
+  kind: appliance
+  names:
+    en-GB: spice grinder
+    de-AT: Gewürzmühle
+  aliases:
+    en-GB: [electric spice grinder]
+    de-AT: [elektrische Gewürzmühle]
+  icon: grain
+- key: espresso_machine
+  kind: appliance
+  names:
+    en-GB: espresso machine
+    de-AT: Espressomaschine
+  aliases:
+    en-GB: [espresso coffee machine]
+    de-AT: [Siebträgermaschine, Siebträger]
+  icon: coffee-maker
+- key: milk_frother
+  kind: appliance
+  names:
+    en-GB: milk frother
+    de-AT: Milchaufschäumer
+  aliases:
+    en-GB: [milk foamer]
+    de-AT: [Milchschäumer]
+  icon: coffee
+- key: soda_maker
+  kind: appliance
+  names:
+    en-GB: soda maker
+    de-AT: Wassersprudler
+  aliases:
+    en-GB: [sparkling water maker, carbonator, SodaStream]
+    de-AT: [Trinkwassersprudler, Sodamaschine, SodaStream]
+  icon: bottle-soda-outline
+- key: vacuum_sealer
+  kind: appliance
+  names:
+    en-GB: vacuum sealer
+    de-AT: Vakuumierer
+  aliases:
+    en-GB: [vacuum packer, vacuum packing machine]
+    de-AT: [Vakuumiergerät, Folienschweißgerät]
+  icon: package-variant-closed
+- key: dehydrator
+  kind: appliance
+  names:
+    en-GB: food dehydrator
+    de-AT: Dörrautomat
+  aliases:
+    en-GB: [dehydrator]
+    de-AT: [Dörrgerät, Dörrapparat]
+  icon: fan
+- key: smoker
+  kind: appliance
+  names:
+    en-GB: smoker
+    de-AT: Räucherofen
+  aliases:
+    en-GB: [smokehouse, smoker grill]
+    de-AT: [Smoker, Räuchergerät]
+  icon: smoke
+- key: steam_oven
+  kind: appliance
+  names:
+    en-GB: steam oven
+    de-AT: Dampfgarer
+  aliases:
+    en-GB: [combi steam oven, steamer oven]
+    de-AT: [Dampfbackofen, Dampfgarofen, Steamer]
+  icon: toaster-oven
+- key: contact_grill
+  kind: appliance
+  names:
+    en-GB: contact grill
+    de-AT: Kontaktgrill
+  aliases:
+    en-GB: [panini press, health grill]
+    de-AT: [Paninigrill]
+  icon: grill
+- key: sandwich_toaster
+  kind: appliance
+  names:
+    en-GB: sandwich toaster
+    de-AT: Sandwichtoaster
+  aliases:
+    en-GB: [toastie maker, sandwich maker]
+    de-AT: [Sandwichmaker]
+  icon: bread-slice
+
+# utensil
+- key: kitchen_scale
+  kind: utensil
+  names:
+    en-GB: kitchen scales
+    de-AT: Küchenwaage
+  aliases:
+    en-GB: [kitchen scale, scale, scales]
+    de-AT: [Waage]
+  icon: scale
+  basic: true
+- key: chefs_knife
+  kind: utensil
+  names:
+    en-GB: "chef's knife"
+    de-AT: Kochmesser
+  aliases:
+    en-GB: ["cook's knife", kitchen knife, knife]
+    de-AT: [Küchenmesser, Messer]
+  icon: knife
+  basic: true
+- key: paring_knife
+  kind: utensil
+  names:
+    en-GB: paring knife
+    de-AT: Gemüsemesser
+  aliases:
+    en-GB: [vegetable knife]
+    de-AT: [Schälmesser, Officemesser]
+  icon: knife
+- key: bread_knife
+  kind: utensil
+  names:
+    en-GB: bread knife
+    de-AT: Brotmesser
+  aliases:
+    en-GB: [serrated knife]
+    de-AT: [Wellenschliffmesser]
+  icon: knife
+- key: chopping_board
+  kind: utensil
+  names:
+    en-GB: chopping board
+    de-AT: Schneidbrett
+  aliases:
+    en-GB: [cutting board]
+    de-AT: [Schneidebrett, Brett]
+  icon: square-outline
+  basic: true
+- key: peeler
+  kind: utensil
+  names:
+    en-GB: peeler
+    de-AT: Sparschäler
+  aliases:
+    en-GB: [vegetable peeler, potato peeler]
+    de-AT: [Schäler, Kartoffelschäler]
+  icon: knife
+  basic: true
+- key: grater
+  kind: utensil
+  names:
+    en-GB: grater
+    de-AT: Reibe
+  aliases:
+    en-GB: [box grater]
+    de-AT: [Küchenreibe, Raspel]
+  icon: cheese
+  basic: true
+- key: zester
+  kind: utensil
+  names:
+    en-GB: zester
+    de-AT: Zestenreibe
+  aliases:
+    en-GB: [microplane, fine grater]
+    de-AT: [Feinreibe, Zitronenreibe]
+  icon: cheese
+- key: whisk
+  kind: utensil
+  names:
+    en-GB: whisk
+    de-AT: Schneebesen
+  aliases:
+    en-GB: [balloon whisk]
+    de-AT: [Schneerute, Rührbesen]
+  icon: silverware-spoon
+  basic: true
+- key: wooden_spoon
+  kind: utensil
+  names:
+    en-GB: wooden spoon
+    de-AT: Kochlöffel
+  aliases:
+    en-GB: [mixing spoon]
+    de-AT: [Rührlöffel, Holzlöffel]
+  icon: silverware-spoon
+  basic: true
+- key: spatula
+  kind: utensil
+  names:
+    en-GB: spatula
+    de-AT: Pfannenwender
+  aliases:
+    en-GB: [turner, fish slice]
+    de-AT: [Wender]
+  icon: silverware-spoon
+  basic: true
+- key: rubber_spatula
+  kind: utensil
+  names:
+    en-GB: rubber spatula
+    de-AT: Teigschaber
+  aliases:
+    en-GB: [silicone spatula]
+    de-AT: [Gummispatel, Silikonspatel]
+  icon: silverware-spoon
+- key: dough_scraper
+  kind: utensil
+  names:
+    en-GB: dough scraper
+    de-AT: Teigkarte
+  aliases:
+    en-GB: [bench scraper]
+    de-AT: [Schaberkarte, Teigspachtel]
+  icon: square-outline
+- key: ladle
+  kind: utensil
+  names:
+    en-GB: ladle
+    de-AT: Schöpfer
+  aliases:
+    en-GB: [soup ladle]
+    de-AT: [Schöpflöffel, Kelle, Suppenkelle]
+  icon: silverware-spoon
+  basic: true
+- key: slotted_spoon
+  kind: utensil
+  names:
+    en-GB: slotted spoon
+    de-AT: Schaumlöffel
+  aliases:
+    en-GB: [skimmer]
+    de-AT: [Schaumkelle]
+  icon: silverware-spoon
+- key: tongs
+  kind: utensil
+  names:
+    en-GB: tongs
+    de-AT: Küchenzange
+  aliases:
+    en-GB: [kitchen tongs]
+    de-AT: [Grillzange, Zange]
+  icon: silverware-fork-knife
+  basic: true
+- key: colander
+  kind: utensil
+  names:
+    en-GB: colander
+    de-AT: Seiher
+  aliases:
+    en-GB: [pasta strainer]
+    de-AT: [Nudelsieb, Abtropfsieb, Durchschlag]
+  icon: filter
+  basic: true
+- key: sieve
+  kind: utensil
+  names:
+    en-GB: sieve
+    de-AT: Sieb
+  aliases:
+    en-GB: [strainer, fine-mesh sieve]
+    de-AT: [Haarsieb, Passiersieb]
+  icon: filter
+  basic: true
+- key: rolling_pin
+  kind: utensil
+  names:
+    en-GB: rolling pin
+    de-AT: Nudelholz
+  aliases:
+    en-GB: []
+    de-AT: [Nudelwalker, Teigrolle, Wellholz]
+  icon: baguette
+  basic: true
+- key: mixing_bowl
+  kind: utensil
+  names:
+    en-GB: mixing bowl
+    de-AT: Schüssel
+  aliases:
+    en-GB: [bowl]
+    de-AT: [Rührschüssel, Weitling]
+  icon: bowl
+  basic: true
+- key: measuring_jug
+  kind: utensil
+  names:
+    en-GB: measuring jug
+    de-AT: Messbecher
+  aliases:
+    en-GB: [measuring cup]
+    de-AT: [Messkrug]
+  icon: cup-water
+  basic: true
+- key: tin_opener
+  kind: utensil
+  names:
+    en-GB: tin opener
+    de-AT: Dosenöffner
+  aliases:
+    en-GB: [can opener]
+    de-AT: [Büchsenöffner]
+  icon: silverware-fork-knife
+  basic: true
+- key: garlic_press
+  kind: utensil
+  names:
+    en-GB: garlic press
+    de-AT: Knoblauchpresse
+  aliases:
+    en-GB: []
+    de-AT: [Knoblauchquetsche]
+  icon: hand-back-left
+- key: potato_masher
+  kind: utensil
+  names:
+    en-GB: potato masher
+    de-AT: Erdäpfelstampfer
+  aliases:
+    en-GB: [masher]
+    de-AT: [Kartoffelstampfer, Stampfer]
+  icon: silverware-fork-knife
+- key: potato_ricer
+  kind: utensil
+  names:
+    en-GB: potato ricer
+    de-AT: Erdäpfelpresse
+  aliases:
+    en-GB: [ricer]
+    de-AT: [Kartoffelpresse]
+  icon: hand-back-left
+- key: spaetzle_maker
+  kind: utensil
+  names:
+    en-GB: spätzle maker
+    de-AT: Nockerlsieb
+  aliases:
+    en-GB: [spaetzle maker, spätzle press]
+    de-AT: [Spätzlehobel, Spätzlesieb, Nockerlhobel]
+  icon: filter
+- key: pastry_brush
+  kind: utensil
+  names:
+    en-GB: pastry brush
+    de-AT: Backpinsel
+  aliases:
+    en-GB: [basting brush]
+    de-AT: [Pinsel, Kuchenpinsel]
+  icon: spray
+- key: piping_bag
+  kind: utensil
+  names:
+    en-GB: piping bag
+    de-AT: Spritzsack
+  aliases:
+    en-GB: [pastry bag]
+    de-AT: [Spritzbeutel, Dressiersack]
+  icon: cake
+- key: cookie_cutter
+  kind: utensil
+  names:
+    en-GB: cookie cutter
+    de-AT: Ausstecher
+  aliases:
+    en-GB: [biscuit cutter]
+    de-AT: [Ausstechform, Keksausstecher]
+  icon: cookie
+- key: pastry_wheel
+  kind: utensil
+  names:
+    en-GB: pastry wheel
+    de-AT: Teigrad
+  aliases:
+    en-GB: [pizza cutter, pizza wheel]
+    de-AT: [Teigrädchen, Pizzaschneider]
+  icon: pizza
+- key: mandoline
+  kind: utensil
+  names:
+    en-GB: mandoline
+    de-AT: Gemüsehobel
+  aliases:
+    en-GB: [mandoline slicer]
+    de-AT: [Hobel, Mandoline]
+  icon: knife
+- key: meat_mallet
+  kind: utensil
+  names:
+    en-GB: meat tenderiser
+    de-AT: Fleischklopfer
+  aliases:
+    en-GB: [meat mallet, meat pounder]
+    de-AT: [Schnitzelklopfer, Plattiereisen]
+  icon: hand-back-left
+- key: kitchen_scissors
+  kind: utensil
+  names:
+    en-GB: kitchen scissors
+    de-AT: Küchenschere
+  aliases:
+    en-GB: [kitchen shears]
+    de-AT: [Schere]
+  icon: scissors-cutting
+  basic: true
+- key: kitchen_thermometer
+  kind: utensil
+  names:
+    en-GB: kitchen thermometer
+    de-AT: Küchenthermometer
+  aliases:
+    en-GB: [meat thermometer, probe thermometer]
+    de-AT: [Bratenthermometer, Fleischthermometer]
+  icon: thermometer
+- key: kitchen_timer
+  kind: utensil
+  names:
+    en-GB: kitchen timer
+    de-AT: Küchenwecker
+  aliases:
+    en-GB: [egg timer, timer]
+    de-AT: [Eieruhr, Kurzzeitwecker]
+  icon: timer-outline
+- key: mortar
+  kind: utensil
+  names:
+    en-GB: pestle and mortar
+    de-AT: Mörser
+  aliases:
+    en-GB: [mortar and pestle, mortar]
+    de-AT: [Mörser und Stößel]
+  icon: mortar-pestle
+- key: aluminium_foil
+  kind: utensil
+  names:
+    en-GB: aluminium foil
+    de-AT: Alufolie
+  aliases:
+    en-GB: [tin foil, aluminum foil]
+    de-AT: [Aluminiumfolie]
+  icon: layers-outline
+- key: skewer
+  kind: utensil
+  names:
+    en-GB: skewer
+    de-AT: Spieß
+  aliases:
+    en-GB: [kebab skewer]
+    de-AT: [Grillspieß, Schaschlikspieß]
+  icon: food-drumstick
+- key: citrus_press
+  kind: utensil
+  names:
+    en-GB: citrus press
+    de-AT: Zitruspresse
+  aliases:
+    en-GB: [lemon squeezer, juicer]
+    de-AT: [Zitronenpresse, Saftpresse]
+  icon: hand-water
+- key: oven_gloves
+  kind: utensil
+  names:
+    en-GB: oven gloves
+    de-AT: Topfhandschuhe
+  aliases:
+    en-GB: [oven mitts, pot holders]
+    de-AT: [Ofenhandschuhe, Topflappen]
+  icon: hand-back-left
+  basic: true
+- key: pepper_mill
+  kind: utensil
+  names:
+    en-GB: pepper mill
+    de-AT: Pfeffermühle
+  aliases:
+    en-GB: [pepper grinder]
+    de-AT: []
+  icon: shaker
+- key: measuring_spoons
+  kind: utensil
+  names:
+    en-GB: measuring spoons
+    de-AT: Messlöffel
+  aliases:
+    en-GB: [measuring spoon set]
+    de-AT: [Messlöffelset]
+  icon: spoon-sugar
+- key: measuring_cups
+  kind: utensil
+  names:
+    en-GB: cup measures
+    de-AT: Cup-Messbecher
+  aliases:
+    en-GB: [measuring cup set, US cup measures]
+    de-AT: [Messbechersatz, Cup-Set]
+  icon: cup
+- key: salad_spinner
+  kind: utensil
+  names:
+    en-GB: salad spinner
+    de-AT: Salatschleuder
+  aliases:
+    en-GB: [lettuce spinner, salad dryer]
+    de-AT: [Salattrockner]
+  icon: bowl-outline
+- key: palette_knife
+  kind: utensil
+  names:
+    en-GB: palette knife
+    de-AT: Streichpalette
+  aliases:
+    en-GB: [offset spatula, icing spatula, angled spatula]
+    de-AT: [Palette, Winkelpalette, Konditorpalette]
+  icon: knife
+- key: fillet_knife
+  kind: utensil
+  names:
+    en-GB: filleting knife
+    de-AT: Filetiermesser
+  aliases:
+    en-GB: [fillet knife]
+    de-AT: [Filiermesser]
+  icon: knife
+- key: sharpening_steel
+  kind: utensil
+  names:
+    en-GB: sharpening steel
+    de-AT: Wetzstahl
+  aliases:
+    en-GB: [honing steel, knife steel, honing rod, knife sharpener]
+    de-AT: [Schleifstab, Messerschärfer, Abziehstahl]
+  icon: knife-military
+- key: ice_cream_scoop
+  kind: utensil
+  names:
+    en-GB: ice cream scoop
+    de-AT: Eisportionierer
+  aliases:
+    en-GB: [scoop, disher]
+    de-AT: [Eiskugelportionierer, Eisschaufel]
+  icon: ice-cream
+- key: funnel
+  kind: utensil
+  names:
+    en-GB: funnel
+    de-AT: Trichter
+  aliases:
+    en-GB: [kitchen funnel]
+    de-AT: [Einfülltrichter]
+  icon: filter-outline
+- key: kitchen_twine
+  kind: utensil
+  names:
+    en-GB: kitchen string
+    de-AT: Küchenspagat
+  aliases:
+    en-GB: [kitchen twine, "butcher's twine", cooking string]
+    de-AT: [Bratenspagat, Küchengarn, Küchenschnur, Rouladengarn]
+  icon: ribbon
+- key: cling_film
+  kind: utensil
+  names:
+    en-GB: cling film
+    de-AT: Frischhaltefolie
+  aliases:
+    en-GB: [plastic wrap, food wrap]
+    de-AT: [Klarsichtfolie, Haushaltsfolie]
+  icon: paper-roll-outline
+- key: preserving_jar
+  kind: utensil
+  names:
+    en-GB: preserving jar
+    de-AT: Einmachglas
+  aliases:
+    en-GB: [Kilner jar, Mason jar, canning jar, jam jar]
+    de-AT: [Rexglas, Einweckglas, Weckglas, Schraubglas]
+  icon: bottle-tonic-outline
+- key: cleaver
+  kind: utensil
+  names:
+    en-GB: cleaver
+    de-AT: Hackbeil
+  aliases:
+    en-GB: [meat cleaver, Chinese cleaver]
+    de-AT: [Hackmesser, Fleischbeil]
+  icon: axe
+- key: splatter_guard
+  kind: utensil
+  names:
+    en-GB: splatter guard
+    de-AT: Spritzschutz
+  aliases:
+    en-GB: [splatter screen, spatter guard]
+    de-AT: [Spritzschutzgitter, Fettspritzschutz]
+  icon: shield-outline
+- key: apple_corer
+  kind: utensil
+  names:
+    en-GB: apple corer
+    de-AT: Apfelausstecher
+  aliases:
+    en-GB: [corer]
+    de-AT: [Apfelentkerner, Kernhausausstecher]
+  icon: food-apple-outline
+- key: nutcracker
+  kind: utensil
+  names:
+    en-GB: nutcracker
+    de-AT: Nussknacker
+  aliases:
+    en-GB: [nut cracker]
+    de-AT: []
+  icon: nut
+- key: cheesecloth
+  kind: utensil
+  names:
+    en-GB: muslin cloth
+    de-AT: Passiertuch
+  aliases:
+    en-GB: [cheesecloth, muslin, straining cloth]
+    de-AT: [Seihtuch, Mulltuch, Käsetuch]
+  icon: filter-variant
+- key: food_mill
+  kind: utensil
+  names:
+    en-GB: food mill
+    de-AT: Passiermühle
+  aliases:
+    en-GB: [mouli, vegetable mill]
+    de-AT: [Flotte Lotte, Gemüsemühle]
+  icon: filter
+- key: mezzaluna
+  kind: utensil
+  names:
+    en-GB: mezzaluna
+    de-AT: Wiegemesser
+  aliases:
+    en-GB: [herb chopper, rocking knife]
+    de-AT: [Kräuterwiege, Kräuterwiegemesser]
+  icon: knife
+- key: cookie_press
+  kind: utensil
+  names:
+    en-GB: cookie press
+    de-AT: Kekspresse
+  aliases:
+    en-GB: [biscuit press, cookie gun]
+    de-AT: [Spritzgebäckpresse, Gebäckpresse]
+  icon: cookie
+- key: cake_server
+  kind: utensil
+  names:
+    en-GB: cake server
+    de-AT: Tortenheber
+  aliases:
+    en-GB: [cake slice, pie server]
+    de-AT: [Kuchenheber]
+  icon: cake
+- key: cake_stand
+  kind: utensil
+  names:
+    en-GB: cake stand
+    de-AT: Tortenständer
+  aliases:
+    en-GB: [cake plate stand, footed cake plate]
+    de-AT: [Kuchenständer, Tortenplatte mit Fuß]
+  icon: cake-layered
+- key: egg_separator
+  kind: utensil
+  names:
+    en-GB: egg separator
+    de-AT: Eitrenner
+  aliases:
+    en-GB: [egg white separator]
+    de-AT: [Eiertrenner]
+  icon: egg-outline
+- key: fish_bone_tweezers
+  kind: utensil
+  names:
+    en-GB: fish bone tweezers
+    de-AT: Grätenpinzette
+  aliases:
+    en-GB: [fish bone pliers, pin bone tweezers]
+    de-AT: [Grätenzange]
+  icon: fish
+- key: oyster_knife
+  kind: utensil
+  names:
+    en-GB: oyster knife
+    de-AT: Austernmesser
+  aliases:
+    en-GB: [oyster shucker]
+    de-AT: [Austernöffner]
+  icon: knife
+- key: sushi_mat
+  kind: utensil
+  names:
+    en-GB: sushi mat
+    de-AT: Sushimatte
+  aliases:
+    en-GB: [bamboo rolling mat, makisu]
+    de-AT: [Bambusmatte, Makisu]
+  icon: rice
+- key: storage_container
+  kind: utensil
+  names:
+    en-GB: food storage container
+    de-AT: Frischhaltedose
+  aliases:
+    en-GB: [storage container, food container, Tupperware]
+    de-AT: [Vorratsdose, Tupperdose, Aufbewahrungsdose]
+  icon: food-takeout-box-outline
+  basic: true
+- key: freezer_bag
+  kind: utensil
+  names:
+    en-GB: freezer bag
+    de-AT: Gefrierbeutel
+  aliases:
+    en-GB: [zip-lock bag, ziplock bag]
+    de-AT: [Gefriersackerl, Zippbeutel]
+  icon: zip-box-outline

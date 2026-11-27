@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cuisine:protocol:cuisine-peering:1:changes-response",
+  "title": "cuisine-peering version 1: changes-response",
+  "type": "object",
+  "description": "GET /changes?since=n: the latest state of every item with a sequence above n, in sequence order, and the channel's highest sequence. While `more` is set, ask again from the last entry's sequence.",
+  "properties": {
+    "since": {
+      "type": "integer"
+    },
+    "max_seq": {
+      "type": "integer"
+    },
+    "more": {
+      "type": "boolean"
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ChangeV1"
+      }
+    }
+  },
+  "required": [
+    "since",
+    "max_seq",
+    "more"
+  ],
+  "$defs": {
+    "ChangeV1": {
+      "type": "object",
+      "description": "The latest state of one item: shared or updated with its revision, or withdrawn as a tombstone.",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "kind",
+        "id",
+        "seq"
+      ]
+    }
+  }
+}

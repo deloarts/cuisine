@@ -1,0 +1,102 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start DB services",
+      "type": "shell",
+      "command": "docker compose -f docker-compose.dev.yml --env-file .env.dev up postgres redis -d",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend server",
+      "detail": "Runs the dev backend under debugpy (port 5678) in its own terminal; the Backend debug config attaches to it.",
+      "type": "shell",
+      "command": "poetry run python -Xfrozen_modules=off -m debugpy --listen 127.0.0.1:5678 -m uvicorn src.bootstrap.main:app --host 0.0.0.0 --port 3000 --reload",
+      "options": {
+        "cwd": "${workspaceFolder}/backend",
+        "env": {
+          "ENV_FILE": "../.env.dev",
+          "PYDEVD_DISABLE_FILE_VALIDATION": "1"
+        }
+      },
+      "dependsOn": "Start DB services",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "uvicorn",
+        "pattern": {
+          "regexp": "^__no_problems__$"
+        },
+        "background": {
+          "beginsPattern": "Will watch for changes",
+          "endsPattern": "Application startup (complete|failed)"
+        }
+      }
+    },
+    {
+      "label": "Stop backend server",
+      "type": "shell",
+      "command": "echo ${input:terminateBackend}",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "Migrate dev database",
+      "type": "shell",
+      "command": "make migrate",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Export OpenAPI and API types",
+      "type": "shell",
+      "command": "make api",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Gates",
+      "type": "shell",
+      "command": "make gates",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "release: start",
+      "type": "shell",
+      "command": "bash scripts/release_start.sh ${input:releaseVersion}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "releaseVersion",
+      "type": "promptString",
+      "description": "Release version (X.Y.Z)"
+    },
+    {
+      "id": "terminateBackend",
+      "type": "command",
+      "command": "workbench.action.tasks.terminate",
+      "args": "Backend server"
+    }
+  ]
+}

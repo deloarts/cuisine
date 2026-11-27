@@ -1,0 +1,114 @@
+# The ingredient categories (supermarket aisles) every instance is seeded
+# with, in aisle order: the walk through an Austrian supermarket that the
+# shopping list groups items by. Hand-edited.
+#
+# Fields: key (stable, never renamed; ingredients.yaml refers to it), names
+# per locale. A key is inserted once, with its position in this file as its
+# sort order, and never brought back once deleted; the names follow seed
+# updates per locale (docs/reference/cookbook.md section 9). household holds
+# the non-food items of shared shopping lists and no base ingredient.
+
+- key: fruit
+  names:
+    en-GB: Fruit
+    de-AT: Obst
+
+- key: vegetables
+  names:
+    en-GB: Vegetables
+    de-AT: Gemüse
+
+- key: herbs
+  names:
+    en-GB: Herbs
+    de-AT: Kräuter
+
+- key: bakery
+  names:
+    en-GB: Bakery
+    de-AT: Brot & Gebäck
+
+- key: chilled
+  names:
+    en-GB: Chilled
+    de-AT: Kühlregal
+
+- key: dairy_eggs
+  names:
+    en-GB: Dairy & eggs
+    de-AT: Milchprodukte & Eier
+
+- key: meat
+  names:
+    en-GB: Meat
+    de-AT: Fleisch & Wurst
+
+- key: fish
+  names:
+    en-GB: Fish
+    de-AT: Fisch
+
+- key: dry_goods
+  names:
+    en-GB: Pasta, rice & grains
+    de-AT: Nudeln, Reis & Getreide
+
+- key: baking
+  names:
+    en-GB: Baking
+    de-AT: Backzutaten
+
+- key: nuts_seeds
+  names:
+    en-GB: Nuts, seeds & dried fruit
+    de-AT: Nüsse, Samen & Trockenfrüchte
+
+- key: breakfast
+  names:
+    en-GB: Breakfast & spreads
+    de-AT: Frühstück & Aufstriche
+
+- key: spices
+  names:
+    en-GB: Spices
+    de-AT: Gewürze
+
+- key: canned
+  names:
+    en-GB: Canned goods
+    de-AT: Konserven
+
+- key: oils_sauces
+  names:
+    en-GB: Oils & sauces
+    de-AT: Öle & Saucen
+
+- key: international
+  names:
+    en-GB: International
+    de-AT: Internationale Küche
+
+- key: frozen
+  names:
+    en-GB: Frozen
+    de-AT: Tiefkühl
+
+- key: snacks_sweets
+  names:
+    en-GB: Snacks & sweets
+    de-AT: Snacks & Süßes
+
+- key: drinks
+  names:
+    en-GB: Drinks
+    de-AT: Getränke
+
+- key: household
+  names:
+    en-GB: Household
+    de-AT: Drogerie & Haushalt
+
+- key: other
+  names:
+    en-GB: Other
+    de-AT: Sonstiges

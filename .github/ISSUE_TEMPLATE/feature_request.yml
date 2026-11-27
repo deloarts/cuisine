@@ -1,0 +1,49 @@
+name: Feature request
+description: Suggest a new feature or a change to an existing one.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you want to do
+      description: The situation or problem behind the request, described from the point of view of someone cooking, planning or running the instance.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How Cuisine could support it. Sketches and screenshots are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Other ways you considered or work around it today.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Recipes and the recipe editor
+        - Ingredients, units and equipment
+        - Meal plan and cooking calendar
+        - Shopping lists
+        - Account, sign-in and two-factor authentication
+        - Household and groups
+        - Admin area
+        - Import, export and exchange files
+        - Public recipes and peering
+        - MCP and agent access
+        - Installation, update or operations
+        - Something else
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and this has not been requested yet.
+          required: true
