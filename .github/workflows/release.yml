@@ -32,7 +32,7 @@ jobs:
       minor: ${{ steps.info.outputs.minor }}
       sha: ${{ steps.info.outputs.sha }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
@@ -51,66 +51,121 @@ jobs:
       - name: Check version files, CHANGELOG and tag
         run: scripts/check_release_version.sh "${{ steps.info.outputs.version }}"
 
-  # Builds both images from the merge commit and pushes them under the
-  # immutable candidate tag sha-<commit> only. Nothing a deployment pulls
-  # points at them until the smoke test passed. Each tag is an image index
-  # for linux/amd64 and linux/arm64 (a Raspberry Pi), so a host pulls its
-  # own platform under the same name. arm64 builds under QEMU, because the
-  # repository is private and GitHub's arm64 runners are free only for
-  # public ones.
+  # Builds each image once per platform, natively on a runner of that
+  # platform, and pushes it by digest only. Nothing a deployment pulls points
+  # at these images until the smoke test passed. The matrix mirrors ci.yml's
+  # images job; change both together.
   images:
     needs: guard
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
     permissions:
       contents: read
       packages: write
     strategy:
+      fail-fast: true
       matrix:
+        component: [backend, frontend]
+        platform: [linux/amd64, linux/arm64]
         include:
           - component: backend
-            context: backend
-            dockerfile: backend/docker/backend.Dockerfile
             target: prod
           - component: frontend
-            context: frontend
-            dockerfile: frontend/docker/frontend.Dockerfile
             target: ""
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch: arm64
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.guard.outputs.sha }}
-      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
-        with:
-          platforms: arm64
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/${{ github.repository }}/${{ matrix.component }}
-          tags: |
-            type=raw,value=sha-${{ needs.guard.outputs.sha }}
-      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+      - id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
+          context: ${{ matrix.component }}
+          file: ${{ matrix.component }}/docker/${{ matrix.component }}.Dockerfile
           target: ${{ matrix.target }}
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.component }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.component }}
+          outputs: type=image,name=ghcr.io/${{ github.repository }}/${{ matrix.component }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ matrix.component }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}-${{ matrix.arch }}
+      # The manifest job below finds each platform's image by this file name.
+      - name: Keep the digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/digests"
+          touch "$RUNNER_TEMP/digests/${DIGEST#sha256:}"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: digests-${{ matrix.component }}-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  # Joins each image's per-platform digests into one image index under the
+  # immutable candidate tag sha-<commit>, so a host pulls its own platform
+  # under the same name, and fails unless the index holds both platforms.
+  manifest:
+    needs: [guard, images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: digests-${{ matrix.component }}-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/digests
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create the candidate's image index
+        working-directory: ${{ runner.temp }}/digests
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}/${{ matrix.component }}
+          CANDIDATE: ${{ needs.guard.outputs.sha }}
+        run: |
+          sources=()
+          for digest in *; do
+            sources+=("$IMAGE@sha256:$digest")
+          done
+          docker buildx imagetools create --tag "$IMAGE:sha-$CANDIDATE" "${sources[@]}"
+          platforms="$(docker buildx imagetools inspect "$IMAGE:sha-$CANDIDATE" --format '{{range .Manifest.Manifests}}{{.Platform.OS}}/{{.Platform.Architecture}} {{end}}')"
+          echo "$IMAGE:sha-$CANDIDATE: $platforms"
+          for platform in linux/amd64 linux/arm64; do
+            if [[ " $platforms " != *" $platform "* ]]; then
+              echo "::error::$IMAGE:sha-$CANDIDATE has no $platform image." >&2
+              exit 1
+            fi
+          done
 
   # Pins the candidate by digest, so the smoke test and the retag below act
   # on exactly the images that were built, whatever happens to the tag.
   resolve:
-    needs: [guard, images]
+    needs: [guard, manifest]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -120,8 +175,8 @@ jobs:
       backend: ${{ steps.digests.outputs.backend }}
       frontend: ${{ steps.digests.outputs.frontend }}
     steps:
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -143,29 +198,28 @@ jobs:
   # empty Postgres and Redis before anything is tagged or published: the
   # entrypoint must migrate the database, the backend must report this
   # version and be ready, and the frontend must serve the app and reach the
-  # backend. See scripts/smoke_release_images.sh. It runs once per platform;
-  # the arm64 run starts the whole stack under QEMU, which is slow but
-  # proves the arm64 images boot.
+  # backend. See scripts/smoke_release_images.sh. It runs once per platform,
+  # each natively on a runner of that platform.
   smoke:
     needs: [guard, resolve]
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
     permissions:
       contents: read
       packages: read
     strategy:
       fail-fast: false
       matrix:
-        platform: [linux/amd64, linux/arm64]
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.guard.outputs.sha }}
-      - if: matrix.platform == 'linux/arm64'
-        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
-        with:
-          platforms: arm64
-      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -176,7 +230,7 @@ jobs:
           FRONTEND: ${{ needs.resolve.outputs.frontend }}
           VERSION: ${{ needs.guard.outputs.version }}
           SMOKE_PLATFORM: ${{ matrix.platform }}
-          SMOKE_TIMEOUT: ${{ matrix.platform == 'linux/arm64' && '1500' || '600' }}
+          SMOKE_TIMEOUT: "600"
         run: scripts/smoke_release_images.sh "$BACKEND" "$FRONTEND" "$VERSION"
 
   tag:
@@ -186,7 +240,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.guard.outputs.sha }}
       - name: Create and push tag
@@ -209,8 +263,8 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -247,7 +301,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.guard.outputs.sha }}
       - name: Extract CHANGELOG section
@@ -259,7 +313,7 @@ jobs:
             found && /^## \[/ { exit }
             found { print }
           ' CHANGELOG.md > release-notes.md
-      - uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+      - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           tag_name: v${{ needs.guard.outputs.version }}
           name: v${{ needs.guard.outputs.version }}
