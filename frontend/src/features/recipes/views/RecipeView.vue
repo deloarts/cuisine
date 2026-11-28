@@ -855,10 +855,6 @@ const cards = computed(() => {
         <span data-testid="guests-might-not-fit">{{ t('recipes.mirror.guestsMightNotFit') }}</span>
       </template>
     </Message>
-    <Message v-else-if="guests.length" class="screen-only" severity="success">
-      <span class="mdi mdi-account-check-outline" aria-hidden="true" />
-      {{ t('recipes.guests.suits', guests.length) }}
-    </Message>
 
     <div class="recipe-body">
       <aside class="recipe-side">

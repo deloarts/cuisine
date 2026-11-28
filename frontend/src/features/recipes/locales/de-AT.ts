@@ -44,7 +44,6 @@ export default {
       hint: 'Gäste zählen nur, wenn sie erlaubt haben, dass andere um ihre Ernährungseinschränkungen herum planen. Du siehst, dass ein Rezept jemandem nicht passt, nie wem oder warum.',
       singleHint: 'Bei einem einzigen Gast heißt das, dass es um diese Person geht.',
       pageHint: 'Dein Gast isst das lieber nicht. | Mindestens einer deiner Gäste isst das lieber nicht.',
-      suits: 'Für deinen Gast passt das. | Für deine Gäste passt das.',
     },
     subRecipes: {
       needs: 'Brauchst du dafür',

@@ -44,7 +44,6 @@ export default {
       hint: "Guests only count if they allowed others to plan around their food restrictions. You see that a recipe doesn't suit someone, never who or why.",
       singleHint: 'With one guest, the flag tells you it is about them.',
       pageHint: 'Your dinner guest would rather not eat this. | At least one of your dinner guests would rather not eat this.',
-      suits: 'Your dinner guest is fine with this. | Your dinner guests are fine with this.',
     },
     subRecipes: {
       needs: 'Needs',
