@@ -2,7 +2,8 @@
 The cooking history: who cooked what on which day. Everyone sees everyone's
 cook events of the recipes they may see; an event of a recipe hidden from the
 viewer is left out, and stays with its cook. Each user adds, edits and
-deletes their own.
+deletes their own, and logs a recipe at most once a day, whichever variation
+was cooked.
 """
 
 from datetime import date
@@ -10,6 +11,7 @@ from datetime import timedelta
 
 from src.cookbook.application.services.viewer import ViewerResolver
 from src.cookbook.domain.entities.cooking import CookEvent
+from src.cookbook.domain.exceptions import CookEventExistsError
 from src.cookbook.domain.exceptions import CookEventNotFoundError
 from src.cookbook.domain.exceptions import InvalidPlanError
 from src.cookbook.domain.exceptions import RecipeNotFoundError
@@ -123,6 +125,12 @@ class ManageCookEvents:
         if len(note) > 2000:
             raise InvalidPlanError("The note is too long.")
 
+    async def _logged_on(self, user_id: int, recipe_id: int, day: date) -> CookEvent | None:
+        found = await self._events.find(
+            user_id=user_id, recipe_id=recipe_id, date_from=day, date_to=day, limit=1
+        )
+        return found[0] if found else None
+
     async def create(
         self,
         actor: User,
@@ -133,7 +141,39 @@ class ManageCookEvents:
         variation_public_id: str | None = None,
     ) -> CookEvent:
         """Records a cook event of the recipe, or of one of its variations
-        the actor may see."""
+        the actor may see. A second one on the same day is refused, so a
+        note typed for it is never dropped without the cook knowing."""
+        event, created = await self._log(
+            actor, recipe_public_id, cooked_on, servings, note, variation_public_id
+        )
+        if not created:
+            raise CookEventExistsError("You already logged this recipe on that day.")
+        return event
+
+    async def log_once(
+        self,
+        actor: User,
+        recipe_public_id: str,
+        cooked_on: date,
+        servings: int,
+        variation_public_id: str | None = None,
+    ) -> tuple[CookEvent, bool]:
+        """Logs the recipe as cooked on the day unless the actor already did,
+        and says whether it created the event. Cook mode calls it when the
+        cook finishes, so finishing twice in a day leaves one event."""
+        return await self._log(
+            actor, recipe_public_id, cooked_on, servings, "", variation_public_id
+        )
+
+    async def _log(
+        self,
+        actor: User,
+        recipe_public_id: str,
+        cooked_on: date,
+        servings: int,
+        note: str,
+        variation_public_id: str | None,
+    ) -> tuple[CookEvent, bool]:
         recipe = await self._recipes.get_by_public_id(recipe_public_id)
         viewer = await self._viewers.of(actor)
         if recipe is None or not can_view_recipe(viewer, recipe):
@@ -151,6 +191,9 @@ class ManageCookEvents:
         if recipe.status is not RecipeStatus.PUBLISHED:
             raise InvalidPlanError("Only published recipes go into the cooking history.")
         self._check(cooked_on, servings, note)
+        existing = await self._logged_on(actor.id, recipe.id, cooked_on)
+        if existing is not None:
+            return existing, False
         event = await self._events.save(
             CookEvent(
                 user_id=actor.id,
@@ -163,13 +206,17 @@ class ManageCookEvents:
             )
         )
         await self._uow.commit()
-        return event
+        return event, True
 
     async def update(
         self, actor: User, public_id: str, cooked_on: date, servings: int, note: str
     ) -> CookEvent:
         event = await self._own(actor, public_id)
         self._check(cooked_on, servings, note)
+        if cooked_on != event.cooked_on and await self._logged_on(
+            actor.id, event.recipe_id, cooked_on
+        ):
+            raise CookEventExistsError("You already logged this recipe on that day.")
         event.cooked_on = cooked_on
         event.servings = servings
         event.note = note.strip()

@@ -37,6 +37,14 @@ class CookEventRequest(RequestSchema):
     note: str = Field(default="", max_length=2000)
 
 
+class CookOnceRequest(RequestSchema):
+    recipe_id: UUID
+    variation_id: UUID | None = None
+    # The cook's own day, which the client knows and the server does not.
+    cooked_on: date
+    servings: int = Field(ge=1, le=100)
+
+
 class CookEventUpdate(RequestSchema):
     cooked_on: date
     servings: int = Field(ge=1, le=100)
@@ -55,6 +63,12 @@ class CookEventResponse(ResponseSchema):
     variation: VariationRef | None = None
     is_own: bool
     created: datetime
+
+
+class CookOnceResponse(ResponseSchema):
+    event: CookEventResponse
+    # False when the recipe was already logged that day and nothing changed.
+    created: bool
 
 
 # ── Meal plan ────────────────────────────────────────────────────────

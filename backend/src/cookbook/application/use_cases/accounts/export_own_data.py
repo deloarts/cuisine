@@ -157,6 +157,7 @@ class ExportOwnData:
             },
             "recipe_highlight_mentions": user.recipe_highlight_mentions,
             "keep_screen_on": user.keep_screen_on,
+            "cook_mode_layout": user.cook_mode_layout.value,
             "privacy_acknowledged_version": user.privacy_acknowledged_version,
             "privacy_acknowledged_at": user.privacy_acknowledged_at,
         }

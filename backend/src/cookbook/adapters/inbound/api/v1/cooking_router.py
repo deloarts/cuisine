@@ -23,6 +23,8 @@ from src.cookbook.adapters.inbound.api.schemas.cooking_schema import AddedRespon
 from src.cookbook.adapters.inbound.api.schemas.cooking_schema import CookEventRequest
 from src.cookbook.adapters.inbound.api.schemas.cooking_schema import CookEventResponse
 from src.cookbook.adapters.inbound.api.schemas.cooking_schema import CookEventUpdate
+from src.cookbook.adapters.inbound.api.schemas.cooking_schema import CookOnceRequest
+from src.cookbook.adapters.inbound.api.schemas.cooking_schema import CookOnceResponse
 from src.cookbook.adapters.inbound.api.schemas.cooking_schema import FoodRestrictionRequest
 from src.cookbook.adapters.inbound.api.schemas.cooking_schema import FoodRestrictionResponse
 from src.cookbook.adapters.inbound.api.schemas.cooking_schema import HomeResponse
@@ -128,7 +130,9 @@ async def create_cook_event(
     presenter: Presenter = Depends(get_presenter),
     use_case: ManageCookEvents = Depends(get_manage_cook_events),
 ) -> CookEventResponse:
-    """ "I cooked this": records the viewer cooking a recipe on a day."""
+    """ "I cooked this": records the viewer cooking a recipe on a day. A
+    second log of the same recipe on the same day answers 409
+    CookEventExistsError."""
     event = await use_case.create(
         user,
         str(body.recipe_id),
@@ -138,6 +142,26 @@ async def create_cook_event(
         str(body.variation_id) if body.variation_id else None,
     )
     return (await presenter.cook_events([event]))[0]
+
+
+@router.put("/cook-events/once", response_model=CookOnceResponse, tags=["cooking"])
+async def log_cook_once(
+    body: CookOnceRequest,
+    user: User = Depends(get_current_user),
+    presenter: Presenter = Depends(get_presenter),
+    use_case: ManageCookEvents = Depends(get_manage_cook_events),
+) -> CookOnceResponse:
+    """Logs the recipe as cooked on the day unless the viewer already did;
+    repeating it changes nothing. Cook mode calls it when the cook
+    finishes."""
+    event, created = await use_case.log_once(
+        user,
+        str(body.recipe_id),
+        body.cooked_on,
+        body.servings,
+        str(body.variation_id) if body.variation_id else None,
+    )
+    return CookOnceResponse(event=(await presenter.cook_events([event]))[0], created=created)
 
 
 @router.put("/cook-events/{event_id}", response_model=CookEventResponse, tags=["cooking"])

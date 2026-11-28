@@ -47,3 +47,12 @@ class AmountStyle(StrValueEnum):
     # ⅛ l and ¼ kg when the amount is a common kitchen fraction of a
     # litre or kilogram, exact decimals otherwise.
     FRACTIONS = "fractions"
+
+
+class CookModeLayout(StrValueEnum):
+    """How cook mode lays out a recipe's steps, a display preference only."""
+
+    # One step per screen, moved through with swipes, keys or buttons.
+    STEP = "step"
+    # Every step in one scrolling column, the current one highlighted.
+    FLOW = "flow"

@@ -9,12 +9,15 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { i18n } from '@/core/i18n'
 import { useCurrentUserStore } from '@/core/stores/currentUserStore'
 import type { RecipeDetailResponse } from '@/features/recipes/api/recipes'
+import { isoDay } from '@/features/recipes/utils/dates'
 import RecipeView from '@/features/recipes/views/RecipeView.vue'
 import CookModeView from '@/features/recipes/views/CookModeView.vue'
 
 const getRecipe = vi.fn<(id: string, options?: { guests?: string[] }) => Promise<RecipeDetailResponse>>()
 const setFavourite = vi.fn<() => Promise<void>>()
 const getDeletionImpact = vi.fn<() => Promise<unknown>>()
+const logCookOnce = vi.fn<(...args: unknown[]) => Promise<unknown>>()
+const saveCookModeLayout = vi.fn<(layout: string) => Promise<unknown>>()
 
 vi.mock('@/features/recipes/api/recipes', () => ({
   getRecipe: (id: string, options?: { guests?: string[] }) => getRecipe(id, options),
@@ -30,6 +33,8 @@ vi.mock('@/features/recipes/api/recipes', () => ({
   removeRating: vi.fn<() => void>(),
   saveNote: vi.fn<() => void>(),
   logCookEvent: vi.fn<() => void>(),
+  logCookOnce: (...args: unknown[]) => logCookOnce(...args),
+  saveCookModeLayout: (layout: string) => saveCookModeLayout(layout),
   listVariations: () => Promise.resolve([]),
   viewVariation: vi.fn<() => void>(),
   deleteVariation: vi.fn<() => void>(),
@@ -240,10 +245,15 @@ describe('CookModeView', () => {
     setActivePinia(createPinia())
     i18n.global.locale.value = 'enGB'
     getRecipe.mockResolvedValue(recipe())
+    logCookOnce.mockReset()
+    logCookOnce.mockResolvedValue({ event: {}, created: true })
+    saveCookModeLayout.mockReset()
+    saveCookModeLayout.mockResolvedValue({ id: 'me', language: 'enGB', cook_mode_layout: 'flow' })
+    Element.prototype.scrollIntoView = vi.fn<() => void>()
   })
 
-  it('walks the steps with the scaled ingredients and ends on the finish screen', async () => {
-    const { wrapper } = await mountAt('/recipes/r1/cook?servings=4', CookModeView)
+  it('walks the steps with the scaled ingredients and finishes by logging and leaving', async () => {
+    const { wrapper, router } = await mountAt('/recipes/r1/cook?servings=4', CookModeView)
     expect(wrapper.text()).toContain('Step 1 of 2')
     expect(wrapper.text()).toContain('Whisk the flour')
     expect(wrapper.text()).toContain('400 g')
@@ -252,10 +262,101 @@ describe('CookModeView', () => {
     await button('Next')!.trigger('click')
     expect(wrapper.text()).toContain('Fry them thin.')
     expect(wrapper.text()).toContain('Timer 5 min')
+    expect(button('Next')).toBeUndefined()
 
     await button('Finish')!.trigger('click')
-    expect(wrapper.text()).toContain('Enjoy your meal!')
-    expect(wrapper.text()).toContain('I cooked this')
+    await flushPromises()
+    expect(logCookOnce).toHaveBeenCalledTimes(1)
+    expect(logCookOnce).toHaveBeenCalledWith('r1', isoDay(), 4, null)
+    expect(router.currentRoute.value.name).toBe('recipe')
+    expect(wrapper.text()).not.toContain('Enjoy your meal!')
+  })
+
+  it('leaves silently when the log fails', async () => {
+    logCookOnce.mockRejectedValueOnce(new Error('offline'))
+    const { wrapper, router } = await mountAt('/recipes/r1/cook', CookModeView)
+    await wrapper.get('[data-testid="cook-next"]').trigger('click')
+    await wrapper.get('[data-testid="cook-finish"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('recipe')
+    expect(document.body.textContent).not.toContain('offline')
+  })
+
+  it('does not log when closed with the X', async () => {
+    const { wrapper, router } = await mountAt('/recipes/r1/cook', CookModeView)
+    await wrapper.get('[aria-label="Leave cook mode"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('recipe')
+    expect(logCookOnce).not.toHaveBeenCalled()
+  })
+
+  it('does not log a draft', async () => {
+    getRecipe.mockResolvedValue({ ...recipe(), status: 'draft' })
+    const { wrapper } = await mountAt('/recipes/r1/cook', CookModeView)
+    await wrapper.get('[data-testid="cook-next"]').trigger('click')
+    await wrapper.get('[data-testid="cook-finish"]').trigger('click')
+    await flushPromises()
+    expect(logCookOnce).not.toHaveBeenCalled()
+  })
+
+  it('does not log a sub-recipe and leads back to its parent', async () => {
+    const { wrapper, router } = await mountAt('/recipes/r1/cook?parent=p1&batches=1', CookModeView)
+    await wrapper.get('[data-testid="cook-next"]').trigger('click')
+    await wrapper.get('[data-testid="cook-finish"]').trigger('click')
+    await flushPromises()
+    expect(logCookOnce).not.toHaveBeenCalled()
+    expect(router.currentRoute.value.name).toBe('recipe-cook')
+    expect(router.currentRoute.value.params.id).toBe('p1')
+  })
+
+  it('opens in the layout saved on the account and finishes from the end of the column', async () => {
+    useCurrentUserStore().user = { id: 'me', cook_mode_layout: 'flow' } as never
+    const { wrapper, router } = await mountAt('/recipes/r1/cook', CookModeView)
+    const flow = wrapper.get('[data-testid="cook-flow"]')
+    expect(flow.text()).toContain('Whisk the flour')
+    expect(flow.text()).toContain('Fry them thin.')
+    expect(wrapper.find('nav').exists()).toBe(false)
+
+    await wrapper.get('[data-testid="cook-finish"]').trigger('click')
+    await flushPromises()
+    expect(logCookOnce).toHaveBeenCalledTimes(1)
+    expect(router.currentRoute.value.name).toBe('recipe')
+  })
+
+  it('switches the layout, keeps the step and saves the choice', async () => {
+    saveCookModeLayout.mockImplementation((layout) => Promise.resolve({ id: 'me', language: 'enGB', cook_mode_layout: layout }))
+    const { wrapper } = await mountAt('/recipes/r1/cook', CookModeView)
+    await wrapper.get('[data-testid="cook-next"]').trigger('click')
+
+    await wrapper.get('[data-testid="cook-layout-toggle"]').trigger('click')
+    await flushPromises()
+    expect(saveCookModeLayout).toHaveBeenLastCalledWith('flow')
+    expect(wrapper.find('[data-testid="cook-flow"]').exists()).toBe(true)
+    expect(wrapper.get('[aria-current="step"]').text()).toContain('Fry them thin.')
+    expect(useCurrentUserStore().user?.cook_mode_layout).toBe('flow')
+
+    await wrapper.get('[data-testid="cook-layout-toggle"]').trigger('click')
+    await flushPromises()
+    expect(saveCookModeLayout).toHaveBeenLastCalledWith('step')
+    expect(wrapper.get('[data-testid="cook-step"]').text()).toContain('Fry them thin.')
+    expect(wrapper.get('[data-testid="cook-step-label"]').text()).toBe('Step 2 of 2')
+  })
+
+  it('goes back to the old layout when saving it fails', async () => {
+    saveCookModeLayout.mockRejectedValueOnce(new Error('offline'))
+    const { wrapper } = await mountAt('/recipes/r1/cook', CookModeView)
+    await wrapper.get('[data-testid="cook-layout-toggle"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('[data-testid="cook-flow"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="cook-step"]').exists()).toBe(true)
+  })
+
+  it('makes a step current with a tap on its number in flow mode', async () => {
+    useCurrentUserStore().user = { id: 'me', cook_mode_layout: 'flow' } as never
+    const { wrapper } = await mountAt('/recipes/r1/cook', CookModeView)
+    await wrapper.get('[aria-label="Go to step 2"]').trigger('click')
+    expect(wrapper.get('[aria-current="step"]').text()).toContain('Fry them thin.')
+    expect(wrapper.get('[data-testid="cook-step-label"]').text()).toBe('Step 2 of 2')
   })
 
   it('offers the sub-recipes first and opens one in cook mode', async () => {
@@ -506,6 +607,25 @@ describe('RecipeView actions and cards', () => {
     await flushPromises()
     expect(setFavourite).toHaveBeenCalledTimes(1)
     expect(wrapper.get('[data-testid="recipe-favourite"]').text()).toBe('Favourited')
+  })
+
+  it('says the recipe was cooked today instead of offering a second log', async () => {
+    getRecipe.mockResolvedValue({ ...recipe(), last_cooked: isoDay(), last_cooked_by_me: isoDay() })
+    const { wrapper } = await mountAt('/recipes/r1', RecipeView)
+    const buttons = wrapper.findAll('[data-testid="recipe-cooked"]')
+    expect(buttons).toHaveLength(2)
+    for (const button of buttons) {
+      expect(button.text()).toBe('Cooked today')
+      expect(button.attributes('disabled')).toBeDefined()
+    }
+  })
+
+  it('offers the log while today is not logged yet', async () => {
+    getRecipe.mockResolvedValue({ ...recipe(), last_cooked_by_me: '2020-01-01' })
+    const { wrapper } = await mountAt('/recipes/r1', RecipeView)
+    const button = wrapper.get('[data-testid="recipe-cooked"]')
+    expect(button.text()).toBe('I cooked this')
+    expect(button.attributes('disabled')).toBeUndefined()
   })
 
   it('orders the cards below the recipe as tips, notes, cooked and rating', async () => {

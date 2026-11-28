@@ -4,32 +4,34 @@ import { ref } from 'vue'
 import { useCookMode, useStepTimer } from '@/features/recipes/composables/useCookMode'
 
 describe('useCookMode', () => {
-  it('walks the steps and ends on the finish screen', () => {
+  it('walks the steps and stops on the last one', () => {
     const mode = useCookMode(ref(3))
     expect(mode.isFirst.value).toBe(true)
     mode.next()
+    expect(mode.isLast.value).toBe(false)
     mode.next()
     expect(mode.index.value).toBe(2)
-    expect(mode.isFinish.value).toBe(false)
+    expect(mode.isLast.value).toBe(true)
     mode.next()
-    expect(mode.isFinish.value).toBe(true)
+    expect(mode.index.value).toBe(2)
     expect(mode.progress.value).toBe(1)
   })
 
-  it('never leaves the range of screens', () => {
+  it('never leaves the range of steps', () => {
     const mode = useCookMode(ref(2))
     mode.prev()
     expect(mode.index.value).toBe(0)
     mode.goTo(10)
-    expect(mode.index.value).toBe(2)
+    expect(mode.index.value).toBe(1)
     mode.goTo(-4)
     expect(mode.index.value).toBe(0)
   })
 
-  it('reports progress as the share of steps done', () => {
+  it('reports progress as the share of steps reached', () => {
     const mode = useCookMode(ref(4))
-    mode.next()
     expect(mode.progress.value).toBe(0.25)
+    mode.next()
+    expect(mode.progress.value).toBe(0.5)
   })
 })
 

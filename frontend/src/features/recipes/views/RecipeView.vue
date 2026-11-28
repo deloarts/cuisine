@@ -81,7 +81,7 @@ import RichText from '@/shared/components/richText/RichText.vue'
 import UserAvatar from '@/shared/components/UserAvatar.vue'
 import ScrollFade from '@/shared/components/ScrollFade.vue'
 import { downloadBlob } from '@/shared/composables/fileTransfer'
-import { formatDay } from '@/features/recipes/utils/dates'
+import { formatDay, isoDay } from '@/features/recipes/utils/dates'
 import { useKeepScreenOn } from '@/shared/composables/useKeepScreenOn'
 import { contentLocaleOf } from '@/shared/cookbook/contentLocale'
 import type { ContentLocale } from '@/shared/cookbook/types'
@@ -128,6 +128,9 @@ const servings = ref(1)
 const contentLocale = computed<ContentLocale>(() => contentLocaleOf(locale.value))
 const cookEvents = ref<CookEventResponse[]>([])
 const cookedOpen = ref(false)
+// A recipe is logged at most once a day, so once today's meal is in the
+// calendar the button says so instead of offering a second one.
+const cookedToday = computed(() => recipe.value?.last_cooked_by_me === isoDay())
 const deleteOpen = ref(false)
 const listOpen = ref(false)
 // The cooked card lists everybody's meals or only the reader's own.
@@ -735,10 +738,12 @@ const cards = computed(() => {
             @click="toggleFavourite"
           />
           <Button
-            :label="t('recipes.cooked.button')"
-            icon="mdi mdi-check-circle-outline"
+            :label="cookedToday ? t('recipes.cooked.today') : t('recipes.cooked.button')"
+            :icon="cookedToday ? 'mdi mdi-check-circle' : 'mdi mdi-check-circle-outline'"
             severity="secondary"
             outlined
+            data-testid="recipe-cooked"
+            :disabled="cookedToday"
             @click="cookedOpen = true"
           />
           <Button
@@ -1112,10 +1117,12 @@ const cards = computed(() => {
           <p v-else class="hint">{{ t('recipes.detail.neverCooked') }}</p>
           <div class="row-actions">
             <Button
-              :label="t('recipes.cooked.button')"
-              icon="mdi mdi-check-circle-outline"
+              :label="cookedToday ? t('recipes.cooked.today') : t('recipes.cooked.button')"
+              :icon="cookedToday ? 'mdi mdi-check-circle' : 'mdi mdi-check-circle-outline'"
               severity="secondary"
               outlined
+              data-testid="recipe-cooked"
+              :disabled="cookedToday"
               @click="cookedOpen = true"
             />
           </div>

@@ -37,6 +37,7 @@ function user(overrides: Partial<CurrentUserResponse> = {}): CurrentUserResponse
     recipe_show_rating: true,
     recipe_highlight_mentions: true,
     keep_screen_on: true,
+    cook_mode_layout: 'step',
     privacy_acknowledgement_pending: false,
     ...overrides,
   }

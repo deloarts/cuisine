@@ -12,6 +12,7 @@ from src.platform.domain.exceptions import PeerRecipesNotAllowedError
 from src.platform.domain.exceptions import PublicRecipesNotAllowedError
 from src.platform.domain.services.password_rules import assert_password_acceptable
 from src.platform.domain.value_objects.display import AmountStyle
+from src.platform.domain.value_objects.display import CookModeLayout
 from src.platform.domain.value_objects.language import Language
 from src.platform.domain.value_objects.security_event_type import SecurityEventOutcome
 from src.platform.domain.value_objects.security_event_type import SecurityEventType
@@ -51,6 +52,7 @@ class UpdateOwnProfileCommand:
     recipe_show_rating: bool | None = None
     recipe_highlight_mentions: bool | None = None
     keep_screen_on: bool | None = None
+    cook_mode_layout: CookModeLayout | None = None
 
 
 class UpdateOwnProfile:
@@ -104,6 +106,7 @@ class UpdateOwnProfile:
             "recipe_show_rating",
             "recipe_highlight_mentions",
             "keep_screen_on",
+            "cook_mode_layout",
         ):
             value = getattr(cmd, name)
             if value is not None:

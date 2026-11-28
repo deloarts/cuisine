@@ -33,6 +33,11 @@ class CookEventNotFoundError(NotFoundError):
     """No cook event of the caller with this id."""
 
 
+class CookEventExistsError(ConflictError):
+    """The caller already logged this recipe on this day; a user logs a
+    recipe at most once a day."""
+
+
 class MealPlanEntryNotFoundError(NotFoundError):
     """No meal plan entry of the caller with this id."""
 

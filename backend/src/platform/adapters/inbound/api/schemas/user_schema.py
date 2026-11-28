@@ -10,6 +10,7 @@ from src.platform.adapters.inbound.api.schemas.base import ResponseSchema
 from src.platform.domain.entities.user import User
 from src.platform.domain.services.login_rules import totp_mandatory
 from src.platform.domain.value_objects.display import AmountStyle
+from src.platform.domain.value_objects.display import CookModeLayout
 from src.platform.domain.value_objects.language import Language
 from src.platform.domain.value_objects.theme import ThemePreset
 from src.platform.domain.value_objects.theme import ThemePrimary
@@ -84,6 +85,8 @@ class CurrentUserResponse(UserResponse):
     recipe_highlight_mentions: bool
     # Whether an open recipe or shopping list keeps the screen on.
     keep_screen_on: bool
+    # How cook mode shows the steps: one per screen or all in one column.
+    cook_mode_layout: CookModeLayout
     # Whether the user must acknowledge the current privacy statement
     # before anything else works, and which version that is.
     privacy_acknowledgement_pending: bool = False
@@ -145,6 +148,7 @@ def user_response[R: UserResponse](
         "recipe_show_rating": user.recipe_show_rating,
         "recipe_highlight_mentions": user.recipe_highlight_mentions,
         "keep_screen_on": user.keep_screen_on,
+        "cook_mode_layout": user.cook_mode_layout,
     }
     return cls.model_validate(data)
 
@@ -176,6 +180,7 @@ class UpdateOwnProfileRequest(RequestSchema):
     recipe_show_rating: bool | None = None
     recipe_highlight_mentions: bool | None = None
     keep_screen_on: bool | None = None
+    cook_mode_layout: CookModeLayout | None = None
 
 
 class ChangePasswordRequest(RequestSchema):

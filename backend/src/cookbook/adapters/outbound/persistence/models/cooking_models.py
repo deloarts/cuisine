@@ -9,6 +9,7 @@ from sqlalchemy import Index
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
+from sqlalchemy import UniqueConstraint
 from sqlalchemy import false
 from sqlalchemy import text as sql_text
 from sqlalchemy.orm import Mapped
@@ -22,6 +23,12 @@ from src.platform.adapters.outbound.persistence.types import UtcDateTime
 
 class CookEventModel(PublicIdMixin, Base):
     __tablename__ = "cook_events"
+    # A user logs a recipe at most once a day.
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id", "recipe_id", "cooked_on", name="uq_cook_events_user_recipe_day"
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(

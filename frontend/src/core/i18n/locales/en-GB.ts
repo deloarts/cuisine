@@ -651,6 +651,7 @@ export default {
     NotInHouseholdError: 'You need to belong to a household for this.',
     MealPlanEntryNotFoundError: 'This meal plan entry does not exist.',
     CookEventNotFoundError: 'This entry in your cook history does not exist.',
+    CookEventExistsError: 'You already logged this recipe on that day.',
     FoodRestrictionNotFoundError: 'This food restriction does not exist.',
     ShoppingListNotFoundError: 'This shopping list does not exist, or it is not shared with you.',
     ShoppingListNoteNotFoundError: 'This message no longer exists.',

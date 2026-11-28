@@ -13,6 +13,7 @@ from src.platform.adapters.outbound.persistence.repositories._common import pars
 from src.platform.const import SYSTEM_LOGIN
 from src.platform.domain.entities.user import User
 from src.platform.domain.value_objects.display import AmountStyle
+from src.platform.domain.value_objects.display import CookModeLayout
 from src.platform.domain.value_objects.language import Language
 from src.platform.domain.value_objects.theme import ThemePreset
 from src.platform.domain.value_objects.theme import ThemePrimary
@@ -69,6 +70,7 @@ class SqlAlchemyUserRepository:
             recipe_show_rating=row.recipe_show_rating,
             recipe_highlight_mentions=row.recipe_highlight_mentions,
             keep_screen_on=row.keep_screen_on,
+            cook_mode_layout=CookModeLayout(row.cook_mode_layout),
             avatar_file_id=row.avatar_file_id,
             privacy_acknowledged_version=row.privacy_acknowledged_version,
             privacy_acknowledged_at=row.privacy_acknowledged_at,
@@ -190,6 +192,7 @@ class SqlAlchemyUserRepository:
         row.recipe_show_rating = user.recipe_show_rating
         row.recipe_highlight_mentions = user.recipe_highlight_mentions
         row.keep_screen_on = user.keep_screen_on
+        row.cook_mode_layout = user.cook_mode_layout.value
         row.avatar_file_id = user.avatar_file_id
         row.privacy_acknowledged_version = user.privacy_acknowledged_version
         row.privacy_acknowledged_at = user.privacy_acknowledged_at

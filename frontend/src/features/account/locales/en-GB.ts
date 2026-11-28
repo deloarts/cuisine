@@ -52,6 +52,12 @@ export default {
     label: 'Keep the screen on while cooking and shopping',
     hint: 'While a recipe, cook mode or a shopping list is open, the display stays on. Not every browser supports this.',
   },
+  cookModeLayout: {
+    label: 'Cook mode',
+    step: 'One step at a time',
+    flow: 'All steps in one column',
+    hint: 'How cook mode opens. You can switch there at any time.',
+  },
   amountStyle: {
     label: 'Amounts in recipes',
     decimals: 'Exact decimals (0.125 l)',

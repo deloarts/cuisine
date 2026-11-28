@@ -31,6 +31,7 @@ export type RecipeDeletionImpact = Schemas['RecipeDeletionImpact']
 export type PrivacySettings = Schemas['PrivacySettingsSchema']
 export type RecipeListQuery = QueryOf<'/recipes'>
 export type VariationResponse = Schemas['VariationResponse']
+export type CookModeLayout = Schemas['CookModeLayout']
 export type VariationViewResponse = Schemas['VariationViewResponse']
 export type VariationRequest = Schemas['VariationRequest']
 export type VariationChangeRequest = Schemas['VariationChangeRequest']
@@ -180,6 +181,26 @@ export function logCookEvent(
   return webApi.post('/cook-events', {
     body: { recipe_id: recipeId, variation_id: variationId, cooked_on: cookedOn, servings, note },
   })
+}
+
+/**
+ * Logs the recipe as cooked on the day unless the reader already did, as
+ * cook mode does when the cook finishes. Repeating it changes nothing.
+ */
+export function logCookOnce(
+  recipeId: string,
+  cookedOn: string,
+  servings: number,
+  variationId: string | null = null,
+) {
+  return webApi.put('/cook-events/once', {
+    body: { recipe_id: recipeId, variation_id: variationId, cooked_on: cookedOn, servings },
+  })
+}
+
+/** Saves the layout cook mode opens in on the reader's account. */
+export function saveCookModeLayout(layout: CookModeLayout) {
+  return webApi.patch('/users/me', { body: { cook_mode_layout: layout } })
 }
 
 export function listVariations(recipeId: string) {

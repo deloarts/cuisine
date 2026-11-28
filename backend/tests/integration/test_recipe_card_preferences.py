@@ -76,3 +76,20 @@ async def test_keep_screen_on_is_on_by_default_and_turns_off(cook: httpx.AsyncCl
     assert changed.status_code == 200, changed.text
     assert changed.json()["keep_screen_on"] is False
     assert (await cook.get(f"{WEB}/users/me")).json()["keep_screen_on"] is False
+
+
+async def test_cook_mode_layout_is_step_by_default_and_turns_to_flow(
+    cook: httpx.AsyncClient,
+) -> None:
+    me = (await cook.get(f"{WEB}/users/me")).json()
+    assert me["cook_mode_layout"] == "step"
+
+    changed = await cook.patch(f"{WEB}/users/me", headers=CSRF, json={"cook_mode_layout": "flow"})
+    assert changed.status_code == 200, changed.text
+    assert changed.json()["cook_mode_layout"] == "flow"
+    assert (await cook.get(f"{WEB}/users/me")).json()["cook_mode_layout"] == "flow"
+
+    refused = await cook.patch(
+        f"{WEB}/users/me", headers=CSRF, json={"cook_mode_layout": "carousel"}
+    )
+    assert refused.status_code == 422
