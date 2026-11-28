@@ -386,11 +386,11 @@ describe('RecipeView seasons and more nutrients', () => {
     i18n.global.locale.value = 'enGB'
   })
 
-  it('shows the season months and whether the recipe is in season now', async () => {
+  it('shows the season months without an in-season tag', async () => {
     getRecipe.mockResolvedValue({ ...recipe(), season_months: [11, 12, 1, 2, 6], in_season: true })
     const { wrapper } = await mountAt('/recipes/r1', RecipeView)
     expect(wrapper.text()).toContain('In season: Jun, Nov–Feb')
-    expect(wrapper.text()).toContain('In season now')
+    expect(wrapper.text()).not.toContain('In season now')
   })
 
   it('lists the extended nutrients per serving behind a toggle and marks incomplete ones', async () => {

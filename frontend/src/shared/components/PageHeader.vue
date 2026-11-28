@@ -53,7 +53,7 @@ defineProps<{ title: string; sticky?: boolean }>()
   background: var(--p-surface-50);
 }
 
-:global(.p-dark) .page-header-sticky {
+.p-dark .page-header-sticky {
   background: var(--p-surface-950);
 }
 

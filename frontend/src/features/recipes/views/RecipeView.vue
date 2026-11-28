@@ -69,6 +69,7 @@ import IngredientLines from '@/features/recipes/components/IngredientLines.vue'
 import NotePanel from '@/features/recipes/components/NotePanel.vue'
 import NutritionPanel from '@/features/recipes/components/NutritionPanel.vue'
 import RecipePrintQr from '@/features/recipes/components/RecipePrintQr.vue'
+import RecipeTagList from '@/features/recipes/components/RecipeTagList.vue'
 import RatingPanel from '@/features/recipes/components/RatingPanel.vue'
 import ServingsStepper from '@/features/recipes/components/ServingsStepper.vue'
 import WarningBanner from '@/features/recipes/components/WarningBanner.vue'
@@ -645,7 +646,6 @@ const cards = computed(() => {
           <li v-if="seasonText" :title="t('recipes.detail.seasonHint')">
             <span class="mdi mdi-sprout-outline" aria-hidden="true" />
             {{ t('recipes.detail.season') }}: {{ seasonText }}
-            <Tag v-if="recipe.in_season" :value="t('recipes.detail.seasonNow')" severity="success" />
           </li>
           <li v-if="recipe.owner">
             <UserAvatar class="owner-avatar" :name="recipe.owner.display_name" :avatar-id="recipe.owner.avatar_id" />
@@ -692,25 +692,7 @@ const cards = computed(() => {
             </li>
           </ul>
         </div>
-        <ul v-if="recipe.diets.length" class="recipe-diets" :aria-label="t('recipes.diets.fits')">
-          <li v-for="diet in recipe.diets" :key="diet">
-            <span class="mdi mdi-leaf" aria-hidden="true" />
-            {{ t(`diets.${diet}`) }}
-          </li>
-        </ul>
-        <p v-if="unknownMarkers.length" class="recipe-unknown" data-testid="unknown-markers">
-          <span class="mdi mdi-help-circle-outline" aria-hidden="true" />
-          {{ unknownMarkers.map((m) => t('recipes.mirror.unknownValue', { value: m })).join(', ') }}
-        </p>
-        <p v-if="unconfirmedNames.length" class="recipe-unknown" data-testid="unconfirmed-ingredients">
-          <span class="mdi mdi-help-circle-outline" aria-hidden="true" />
-          {{ t('recipes.diets.unconfirmed', { names: unconfirmedNames.join(', ') }) }}
-        </p>
-        <ul v-if="recipe.tags.length" class="recipe-tags screen-only">
-          <li v-for="tag in recipe.tags" :key="tag.id">
-            <RouterLink :to="{ name: 'recipes', query: { tag: tag.id } }">{{ tag.name }}</RouterLink>
-          </li>
-        </ul>
+        <RecipeTagList v-if="recipe.tags.length" class="screen-only" :tags="recipe.tags" />
         <div class="recipe-actions screen-only">
           <RouterLink
             :to="{
@@ -963,6 +945,29 @@ const cards = computed(() => {
                 names: sourceAllergens.map((a) => t(`allergens.${a}`)).join(', '),
               })
             }}
+          </p>
+        </ContentCard>
+
+        <ContentCard
+          v-if="recipe.diets.length || unknownMarkers.length || unconfirmedNames.length"
+          as="section"
+          class="recipe-panel"
+          data-testid="recipe-card-diets"
+        >
+          <h2>{{ t('recipes.diets.label') }}</h2>
+          <ul v-if="recipe.diets.length" class="recipe-diets" :aria-label="t('recipes.diets.fits')">
+            <li v-for="diet in recipe.diets" :key="diet">
+              <span class="mdi mdi-leaf" aria-hidden="true" />
+              {{ t(`diets.${diet}`) }}
+            </li>
+          </ul>
+          <p v-if="unknownMarkers.length" class="recipe-unknown" data-testid="unknown-markers">
+            <span class="mdi mdi-help-circle-outline" aria-hidden="true" />
+            {{ unknownMarkers.map((m) => t('recipes.mirror.unknownValue', { value: m })).join(', ') }}
+          </p>
+          <p v-if="unconfirmedNames.length" class="recipe-unknown" data-testid="unconfirmed-ingredients">
+            <span class="mdi mdi-help-circle-outline" aria-hidden="true" />
+            {{ t('recipes.diets.unconfirmed', { names: unconfirmedNames.join(', ') }) }}
           </p>
         </ContentCard>
       </aside>
@@ -1541,31 +1546,6 @@ const cards = computed(() => {
   font-weight: 700;
 }
 
-.recipe-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-
-  a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2rem;
-    padding: 0 var(--space-3);
-    border-radius: 2rem;
-    background: var(--p-surface-100);
-    color: inherit;
-    text-decoration: none;
-    font-size: var(--font-size-sm);
-  }
-}
-
-.p-dark .recipe-tags a {
-  background: var(--p-surface-800);
-}
-
 .recipe-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1929,9 +1909,12 @@ const cards = computed(() => {
 // From a laptop up the cover sits beside the intro, and the ingredients stay
 // in view beside the steps while the reader scrolls.
 @media (min-width: $bp-lg) {
-  // The intro is exactly as tall as the cover: `contain: size` keeps its
-  // content from growing the row, a long description scrolls inside its
-  // fading box, and the buttons sit at the cover's lower edge.
+  // The row is as tall as the cover. Only the description gives way: its
+  // `contain: size` lets it count as three lines for the row height, so it
+  // fills whatever room the cover leaves and a longer text scrolls inside its
+  // fading box. When the rest of the intro alone is taller than the cover, the
+  // row grows and the cover crops its photo, so nothing spills onto the cards
+  // below. The buttons sit at the row's lower edge.
   .recipe-hero {
     display: grid;
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
@@ -1939,13 +1922,17 @@ const cards = computed(() => {
     gap: var(--space-6);
   }
 
-  .recipe-intro {
-    contain: size;
+  // A grid item with an aspect ratio would take its width from the stretched
+  // row height and spread over the intro; the explicit width keeps it in its
+  // column, and its photo crops to the taller frame.
+  .recipe-cover {
+    width: 100%;
   }
 
   .recipe-description-box {
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     min-height: 3lh;
+    contain: size;
   }
 
   .recipe-actions {
@@ -1959,8 +1946,12 @@ const cards = computed(() => {
   }
 
   .recipe-hero--plain .recipe-intro {
-    contain: none;
     padding: var(--space-6);
+  }
+
+  .recipe-hero--plain .recipe-description-box {
+    flex: 0 1 auto;
+    contain: none;
   }
 
   // The columns sit as close together as the cards stacked in them.
@@ -2050,11 +2041,9 @@ const cards = computed(() => {
   }
 
   // The paper shows the whole description, never a scrolled box.
-  .recipe-intro {
-    contain: none;
-  }
-
   .recipe-description-box {
+    flex: 0 1 auto;
+    contain: none;
     overflow: visible;
     mask-image: none;
   }

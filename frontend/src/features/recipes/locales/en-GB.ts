@@ -212,8 +212,8 @@ export default {
       notFound: 'This recipe does not exist or is not shared yet.',
       backToRecipes: 'Back to the recipes',
       season: 'In season',
-      seasonNow: 'In season now',
       seasonHint: 'The months in which every seasonal ingredient is in season in Austria.',
+      moreTags: '+{n} more',
     },
     print: {
       variation: 'Variation: {name}',

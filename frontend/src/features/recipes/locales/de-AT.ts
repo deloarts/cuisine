@@ -212,8 +212,8 @@ export default {
       notFound: 'Dieses Rezept gibt es nicht oder es ist noch nicht freigegeben.',
       backToRecipes: 'Zurück zu den Rezepten',
       season: 'Saison',
-      seasonNow: 'Hat gerade Saison',
       seasonHint: 'Die Monate, in denen alle saisonalen Zutaten in Österreich Saison haben.',
+      moreTags: '+{n} weitere',
     },
     print: {
       variation: 'Variante: {name}',

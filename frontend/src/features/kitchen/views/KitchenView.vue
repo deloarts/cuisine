@@ -271,7 +271,11 @@ onMounted(() => void load())
   gap: var(--space-3);
 }
 
+// The global card fills its grid cell, so in two columns a short group would
+// stretch to the height of its neighbour and its grid would spread the title
+// and the list apart. Each group keeps its own height instead.
 .kitchen-group {
+  height: auto;
   display: grid;
   gap: var(--space-1);
   padding: var(--space-2) var(--space-3);
