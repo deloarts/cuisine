@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Cook mode has a second layout that shows every step in one scrolling column. A button in cook mode switches between the layouts without losing the place, and the choice is saved on the account.
+
+### Changed
+
+- "Finish" in cook mode logs the meal in the cooking calendar by itself and closes cook mode; the screen asking to log it is gone.
+- A recipe is logged at most once a day per person. Duplicates already in the cooking calendar are merged into the first entry of that day.
+
 ### Fixed
 
 - The first start of a new instance no longer fails on slower hosts such as a Raspberry Pi, where several backend workers seeded the empty database at once.

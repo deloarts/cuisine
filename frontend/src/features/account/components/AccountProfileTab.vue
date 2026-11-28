@@ -9,6 +9,7 @@ import { onBeforeUnmount, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { PRIMARY_COLORS, SURFACES } from '@/core/config/colorPalettes'
+import type { Schemas } from '@/core/api/generated'
 import { useAppToast } from '@/core/composables/useAppToast'
 import { useCurrentUserStore } from '@/core/stores/currentUserStore'
 import type { Language, ThemePreset, ThemePrimary, ThemeSurface } from '@/core/types/user'
@@ -37,6 +38,7 @@ interface ProfileForm {
   recipe_highlight_mentions: boolean
   keep_screen_on: boolean
   amount_style: AmountStyle
+  cook_mode_layout: Schemas['CookModeLayout']
 }
 
 const form = reactive<ProfileForm>({
@@ -56,6 +58,7 @@ const form = reactive<ProfileForm>({
   recipe_highlight_mentions: true,
   keep_screen_on: true,
   amount_style: 'decimals',
+  cook_mode_layout: 'step',
 })
 const saving = ref(false)
 const saved = ref(false)
@@ -86,6 +89,7 @@ watch(
       recipe_highlight_mentions: user.recipe_highlight_mentions,
       keep_screen_on: user.keep_screen_on,
       amount_style: user.amount_style,
+      cook_mode_layout: user.cook_mode_layout,
     })
   },
   { immediate: true },
@@ -107,6 +111,11 @@ const recipeCards = [
 const amountStyles = [
   { value: 'decimals', label: 'amountStyle.decimals' },
   { value: 'fractions', label: 'amountStyle.fractions' },
+] as const
+// How cook mode opens: one step per screen or every step in one column.
+const cookModeLayouts = [
+  { value: 'step', label: 'cookModeLayout.step' },
+  { value: 'flow', label: 'cookModeLayout.flow' },
 ] as const
 
 // The avatar is saved as soon as it is picked or removed, apart from the form.
@@ -353,6 +362,18 @@ id="profile-surface"
           aria-labelledby="profile-amount-style-label"
         />
         <small class="field-hint">{{ t('amountStyle.hint') }}</small>
+      </div>
+      <div class="field">
+        <label id="profile-cook-mode-layout-label" for="profile-cook-mode-layout">{{ t('cookModeLayout.label') }}</label>
+        <Select
+          id="profile-cook-mode-layout"
+          v-model="form.cook_mode_layout"
+          :options="cookModeLayouts.map((s) => ({ value: s.value, label: t(s.label) }))"
+          option-label="label"
+          option-value="value"
+          aria-labelledby="profile-cook-mode-layout-label"
+        />
+        <small class="field-hint">{{ t('cookModeLayout.hint') }}</small>
       </div>
     </div>
     <div class="field toggle-field">

@@ -1,51 +1,56 @@
 <script setup lang="ts">
 /**
- * Cook mode: the recipe one step at a time, full screen, in big type, with
- * that step's ingredients scaled to the servings chosen on the recipe page.
- * Swipe, the arrow keys or the buttons move between steps; a step with a
- * duration offers a timer; the screen stays on while cooking, unless the
- * reader turned that off on the account page. A start
- * screen lists the sub-recipes to make first and the equipment to set out,
- * marking what the kitchen lacks. The last screen logs the meal. A recipe
- * with variations first asks which version to cook, unless the link says,
- * and cooks the chosen variation as the backend applies it.
+ * Cook mode: the recipe full screen, in big type, with each step's
+ * ingredients scaled to the servings chosen on the recipe page. It has two
+ * layouts the cook switches between at any time, and the choice is saved on
+ * the account: step mode shows one step per screen, moved through with
+ * swipes, the arrow keys or the buttons; flow mode shows every step in one
+ * scrolling column and highlights the one being read. A step with a duration
+ * offers a timer, and the screen stays on while cooking unless the reader
+ * turned that off on the account page. Before step 1 come the sub-recipes to
+ * make first and the equipment to set out, marking what the kitchen lacks.
+ * "Finish" on the last step logs the meal in the cooking calendar, at most
+ * once a day and without a word, and leaves cook mode; a sub-recipe opened
+ * from its parent is not logged and leads back to the parent. A recipe with
+ * variations first asks which version to cook, unless the link says, and
+ * cooks the chosen variation as the backend applies it.
  */
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { onKeyStroke, useSwipe } from '@vueuse/core'
 
 import { useAppToast } from '@/core/composables/useAppToast'
+import { useCurrentUserStore } from '@/core/stores/currentUserStore'
 import {
   getRecipe,
   listVariations,
+  logCookOnce,
+  saveCookModeLayout,
   viewVariation,
+  type CookModeLayout,
   type RecipeDetailResponse,
   type StepMarkerView,
   type VariationResponse,
 } from '@/features/recipes/api/recipes'
-import CookedDialog from '@/features/recipes/components/CookedDialog.vue'
-import EquipmentList from '@/features/recipes/components/EquipmentList.vue'
+import CookIntro from '@/features/recipes/components/CookIntro.vue'
+import CookStep from '@/features/recipes/components/CookStep.vue'
 import IngredientLines from '@/features/recipes/components/IngredientLines.vue'
 import ServingsStepper from '@/features/recipes/components/ServingsStepper.vue'
-import { useAmountFormat } from '@/features/recipes/composables/useAmountFormat'
 import { useCookMode, useStepTimer } from '@/features/recipes/composables/useCookMode'
-import { scaleFactor, scaleIngredients } from '@/features/recipes/utils/scaling'
-import { lineResolver } from '@/features/recipes/utils/mentionResolver'
+import { useCookSteps } from '@/features/recipes/composables/useCookSteps'
+import { isoDay } from '@/features/recipes/utils/dates'
 import { setOutList } from '@/features/recipes/utils/equipment'
-import { extraIngredients, mergeStepLines, plainEquipmentOf } from '@/features/recipes/utils/mirrors'
-import { ORIGINAL, authorName, cookVersion, lineMarks, markerAt } from '@/features/recipes/utils/variations'
-import { contentLocaleOf } from '@/shared/cookbook/contentLocale'
+import { scaleFactor } from '@/features/recipes/utils/scaling'
+import { ORIGINAL, authorName, cookVersion } from '@/features/recipes/utils/variations'
 import EmptyState from '@/shared/components/EmptyState.vue'
-import { imageUrl } from '@/shared/components/recipes/recipeImage'
-import RichText from '@/shared/components/richText/RichText.vue'
 import { useKeepScreenOn } from '@/shared/composables/useKeepScreenOn'
 
-const { t, locale } = useI18n()
-const { style: amountStyle } = useAmountFormat()
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const toast = useAppToast()
+const currentUser = useCurrentUserStore()
 
 const recipe = ref<RecipeDetailResponse | null>(null)
 const failed = ref(false)
@@ -63,6 +68,9 @@ const showIntro = ref(false)
 const parentId = computed(() =>
   typeof route.query.parent === 'string' ? route.query.parent : null,
 )
+const factor = computed(() =>
+  recipe.value ? scaleFactor(servings.value, recipe.value.base_servings) : 1,
+)
 const firstNeeds = computed(() =>
   (recipe.value?.needs ?? []).map((need) => ({
     ...need,
@@ -70,51 +78,39 @@ const firstNeeds = computed(() =>
   })),
 )
 const setOut = computed(() => setOutList(recipe.value?.equipment ?? []))
-// The kitchen's gaps for the current step, from the "You'll need" list.
+const hasIntro = computed(() => firstNeeds.value.length > 0 || setOut.value.length > 0)
+// The kitchen's gaps, from the "You'll need" list, marked on every step.
 const missingIds = computed(
   () => new Set(setOut.value.filter((n) => n.missing === true).map((n) => n.equipment.id)),
 )
-// A mirror's lines kept as text, put back into the step they belong to:
-// the step itself on the original, the step a variation's step came from.
-const mirror = computed(() => recipe.value?.mirror_details ?? null)
-const sourceIndex = computed(() => {
-  if (!step.value) return null
-  if (!variationId.value) return index.value
-  const origin = markerAt(markers.value, step.value.position)?.origin_step
-  return origin ? origin - 1 : null
-})
-const stepEquipment = computed(() => [
-  ...(step.value?.equipment ?? []).map((item) => ({ ...item, missing: missingIds.value.has(item.equipment.id) })),
-  ...plainEquipmentOf(mirror.value, sourceIndex.value),
-])
 const showAll = ref(false)
-const cookedOpen = ref(false)
-const logged = ref(false)
 
-const stepCount = computed(() => recipe.value?.steps.length ?? 0)
-const { index, isFirst, isFinish, progress, next, prev, goTo } = useCookMode(stepCount)
+const { steps: cookSteps, allIngredients } = useCookSteps({
+  recipe,
+  markers,
+  variationId,
+  factor,
+  missingIds,
+})
+const stepCount = computed(() => cookSteps.value.length)
+const { index, isFirst, isLast, progress, next, prev, goTo } = useCookMode(stepCount)
+const current = computed(() => cookSteps.value[index.value] ?? null)
 
-const factor = computed(() =>
-  recipe.value ? scaleFactor(servings.value, recipe.value.base_servings) : 1,
-)
-const step = computed(() => recipe.value?.steps[index.value] ?? null)
-const stepLines = computed(() =>
-  step.value
-    ? mergeStepLines(
-        step.value.ingredients,
-        mirror.value,
-        sourceIndex.value,
-        lineMarks(markerAt(markers.value, step.value.position), step.value.ingredients.length),
-      )
-    : { items: [], marks: [] },
-)
-const stepIngredients = computed(() => scaleIngredients(stepLines.value.items, factor.value))
-const stepMarks = computed(() => stepLines.value.marks)
-const allIngredients = computed(() =>
-  recipe.value
-    ? scaleIngredients([...recipe.value.ingredients, ...extraIngredients(mirror.value)], factor.value)
-    : [],
-)
+// The layout comes from the account; switching saves it there right away
+// and goes back when the save fails, so the switch never lies.
+const layout = ref<CookModeLayout>(currentUser.user?.cook_mode_layout ?? 'step')
+const flow = computed(() => layout.value === 'flow')
+
+async function toggleLayout() {
+  const before = layout.value
+  layout.value = before === 'flow' ? 'step' : 'flow'
+  try {
+    currentUser.apply(await saveCookModeLayout(layout.value))
+  } catch (err) {
+    layout.value = before
+    toast.error(err)
+  }
+}
 
 // One timer for the whole session, so moving on while something simmers
 // keeps it counting; the chip at the bottom names the step it belongs to.
@@ -139,10 +135,11 @@ function beep() {
   }
 }
 
-function startTimer() {
-  if (!step.value?.duration_minutes) return
-  timerStep.value = index.value
-  timer.start(step.value.duration_minutes)
+function startTimer(step: number) {
+  const minutes = cookSteps.value[step]?.step.duration_minutes
+  if (!minutes) return
+  timerStep.value = step
+  timer.start(minutes)
 }
 
 const timerLabel = computed(() => {
@@ -171,20 +168,20 @@ async function load() {
 // Puts the chosen version on the stage: the original as read, or the
 // variation as the backend applies it.
 async function applyVersion(original: RecipeDetailResponse, chosen: string | null) {
-  let next = original
+  let shown = original
   markers.value = []
   if (chosen) {
     const view = await viewVariation(original.id, chosen)
-    next = view.recipe
+    shown = view.recipe
     markers.value = view.steps
   }
   variationId.value = chosen
-  recipe.value = next
+  recipe.value = shown
   // Opened as a sub-recipe: as many servings as the batches the parent needs.
   const batches = Number(route.query.batches)
-  if (batches > 0) servings.value = Math.max(1, Math.round(batches * next.base_servings))
-  if (!servings.value) servings.value = next.base_servings
-  showIntro.value = next.needs.length > 0 || next.equipment.length > 0
+  if (batches > 0) servings.value = Math.max(1, Math.round(batches * shown.base_servings))
+  if (!servings.value) servings.value = shown.base_servings
+  showIntro.value = shown.needs.length > 0 || shown.equipment.length > 0
   goTo(0)
 }
 
@@ -213,15 +210,38 @@ function backToParent() {
   else if (parentId.value) void router.push({ name: 'recipe-cook', params: { id: parentId.value } })
 }
 
+function close() {
+  if (window.history.state?.back) router.back()
+  else void router.push({ name: 'recipe', params: { id: String(route.params.id) } })
+}
+
+// Finishing logs the meal once a day, silently: a failed log never keeps
+// the cook in cook mode. Drafts stay out of the history, and a sub-recipe is
+// part of its parent's meal.
+const finishing = ref(false)
+async function finish() {
+  if (finishing.value || !recipe.value) return
+  finishing.value = true
+  if (recipe.value.status === 'published' && !parentId.value) {
+    try {
+      await logCookOnce(recipe.value.id, isoDay(), servings.value, variationId.value)
+    } catch {
+      // Logging is a convenience here; "I cooked this" on the recipe page remains.
+    }
+  }
+  finishing.value = false
+  if (parentId.value) backToParent()
+  else close()
+}
+
 // Moving between a recipe and its sub-recipe reuses this view, so a new id
 // starts over.
 watch(
   () => route.params.id,
-  (next, previous) => {
-    if (next === previous) return
+  (nextId, previousId) => {
+    if (nextId === previousId) return
     recipe.value = null
     failed.value = false
-    logged.value = false
     variations.value = []
     variationId.value = null
     askVersion.value = false
@@ -232,15 +252,12 @@ watch(
   },
 )
 
-function close() {
-  if (window.history.state?.back) router.back()
-  else void router.push({ name: 'recipe', params: { id: String(route.params.id) } })
-}
-
 const stage = useTemplateRef<HTMLElement>('stage')
 const { direction } = useSwipe(stage, {
   threshold: 60,
   onSwipeEnd: () => {
+    // Flow mode scrolls instead.
+    if (flow.value) return
     if (direction.value === 'left') forward()
     else if (direction.value === 'right') prev()
   },
@@ -253,13 +270,85 @@ function forward() {
   else next()
 }
 
+// ── Flow mode ────────────────────────────────────────────────────────
+// The current step is the one crossing a line near the top of the column,
+// and the last one once the column is scrolled to its end. Moving by key or
+// by a tap on a step's number scrolls that step to the top.
+
+function stepElement(step: number): HTMLElement | null {
+  return stage.value?.querySelector<HTMLElement>(`[data-step-index="${step}"]`) ?? null
+}
+
+function scrollToStep(step: number, behavior: ScrollBehavior = 'smooth') {
+  stepElement(step)?.scrollIntoView({ block: 'start', behavior })
+}
+
+function selectStep(step: number) {
+  goTo(step)
+  scrollToStep(index.value)
+}
+
+let observer: IntersectionObserver | null = null
+
+function observeSteps() {
+  observer?.disconnect()
+  observer = null
+  const root = stage.value
+  if (!flow.value || !root || typeof IntersectionObserver === 'undefined') return
+  observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) index.value = Number((entry.target as HTMLElement).dataset.stepIndex)
+      }
+    },
+    { root, rootMargin: '-12% 0px -87% 0px' },
+  )
+  root.querySelectorAll('[data-step-index]').forEach((el) => observer?.observe(el))
+}
+
+function onStageScroll() {
+  const root = stage.value
+  if (!flow.value || !root) return
+  if (root.scrollTop > 0 && root.scrollTop + root.clientHeight >= root.scrollHeight - 2) {
+    goTo(stepCount.value - 1)
+  }
+}
+
+// Switching keeps the place: flow mode opens at the step step mode showed,
+// and step mode at the step flow mode highlighted.
+watch(flow, async (on) => {
+  await nextTick()
+  if (on) scrollToStep(index.value, 'auto')
+  observeSteps()
+})
+watch([stepCount, askVersion], async () => {
+  await nextTick()
+  observeSteps()
+})
+// Back from all ingredients, flow mode returns to the step it was on.
+watch(showAll, async (open) => {
+  await nextTick()
+  observeSteps()
+  if (flow.value && !open) scrollToStep(index.value, 'auto')
+})
+
 onKeyStroke(['ArrowRight', 'PageDown'], (e) => {
-  if (cookedOpen.value) return
+  if (flow.value) {
+    if (e.key !== 'ArrowRight' || askVersion.value || showAll.value) return
+    e.preventDefault()
+    selectStep(index.value + 1)
+    return
+  }
   e.preventDefault()
   forward()
 })
 onKeyStroke(['ArrowLeft', 'PageUp'], (e) => {
-  if (cookedOpen.value) return
+  if (flow.value) {
+    if (e.key !== 'ArrowLeft' || askVersion.value || showAll.value) return
+    e.preventDefault()
+    selectStep(index.value - 1)
+    return
+  }
   e.preventDefault()
   prev()
 })
@@ -270,6 +359,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   timer.stop()
+  observer?.disconnect()
 })
 </script>
 
@@ -290,10 +380,20 @@ onBeforeUnmount(() => {
           <span class="mdi mdi-source-branch" aria-hidden="true" />
           {{ cooking.name }}
         </p>
-        <p v-if="recipe && !isFinish && !askVersion" class="cook-progress-label">
+        <p v-if="recipe && stepCount && !askVersion" class="cook-progress-label" data-testid="cook-step-label">
           {{ t('recipes.cookMode.step', { n: index + 1, total: stepCount }) }}
         </p>
       </div>
+      <Button
+        :icon="flow ? 'mdi mdi-view-carousel-outline' : 'mdi mdi-view-agenda-outline'"
+        text
+        rounded
+        severity="secondary"
+        data-testid="cook-layout-toggle"
+        :aria-label="flow ? t('recipes.cookMode.showSteps') : t('recipes.cookMode.showFlow')"
+        :aria-pressed="flow"
+        @click="toggleLayout"
+      />
       <Button
         icon="mdi mdi-format-list-bulleted"
         text
@@ -311,10 +411,10 @@ onBeforeUnmount(() => {
       :aria-label="t('recipes.cookMode.progress')"
     />
 
-    <div v-if="recipe" ref="stage" class="cook-stage" aria-live="polite">
+    <div v-if="recipe" ref="stage" class="cook-stage" aria-live="polite" @scroll.passive="onStageScroll">
       <section v-if="askVersion" class="cook-screen" data-testid="cook-choose">
         <h1 class="cook-heading">{{ t('recipes.cookMode.chooseTitle') }}</h1>
-        <p class="cook-finish-text">{{ t('recipes.cookMode.chooseText') }}</p>
+        <p class="cook-muted">{{ t('recipes.cookMode.chooseText') }}</p>
         <ul class="cook-versions">
           <li>
             <button type="button" class="cook-version" data-testid="cook-choose-original" @click="chooseVersion(null)">
@@ -341,39 +441,6 @@ onBeforeUnmount(() => {
         </ul>
       </section>
 
-      <section v-else-if="showIntro && !showAll" class="cook-screen">
-        <h1 class="cook-heading">
-          {{ firstNeeds.length ? t('recipes.cookMode.firstTitle') : t('recipes.cookMode.setOutTitle') }}
-        </h1>
-        <p v-if="firstNeeds.length" class="cook-finish-text">{{ t('recipes.cookMode.firstText') }}</p>
-        <ul v-if="firstNeeds.length" class="cook-first">
-          <li v-for="(need, i) in firstNeeds" :key="need.sub_recipe.id ?? `hidden-${i}`" class="cook-first-item">
-            <span class="cook-first-title">
-              {{ need.sub_recipe.accessible ? need.sub_recipe.title : t('recipes.subRecipes.hidden') }}
-            </span>
-            <Button
-              v-if="need.sub_recipe.accessible && need.sub_recipe.id"
-              :label="t('recipes.cookMode.cookFirst')"
-              icon="mdi mdi-play"
-              severity="secondary"
-              outlined
-              @click="cookFirst(need.sub_recipe.id, need.batches)"
-            />
-          </li>
-        </ul>
-        <div v-if="setOut.length" class="cook-ingredients" data-testid="cook-set-out">
-          <h2>{{ t('recipes.cookMode.setOut') }}</h2>
-          <EquipmentList :items="setOut" large />
-        </div>
-        <Button
-          :label="t('recipes.cookMode.startSteps')"
-          icon="mdi mdi-chevron-right"
-          icon-pos="right"
-          size="large"
-          @click="showIntro = false"
-        />
-      </section>
-
       <section v-else-if="showAll" class="cook-screen">
         <h1 class="cook-heading">{{ t('recipes.cookMode.allIngredients') }}</h1>
         <ServingsStepper v-model="servings" />
@@ -386,66 +453,45 @@ onBeforeUnmount(() => {
         />
       </section>
 
-      <section v-else-if="step && !isFinish" :key="index" class="cook-screen">
-        <div class="cook-step-number" aria-hidden="true">{{ index + 1 }}</div>
-        <RichText
-          class="cook-step-text"
-          :text="step.text"
-          :resolve="
-            lineResolver(stepIngredients, {
-              amounts: true,
-              locale: contentLocaleOf(locale),
-              amountStyle,
-              hiddenName: t('recipes.subRecipes.hidden'),
-              equipment: step.equipment,
-            })
-          "
+      <div v-else-if="flow" class="cook-screen cook-flow" data-testid="cook-flow">
+        <CookIntro v-if="hasIntro" :needs="firstNeeds" :set-out="setOut" @cook-first="cookFirst" />
+        <ol class="cook-flow-steps">
+          <li v-for="(view, i) in cookSteps" :key="view.step.position" :data-step-index="i">
+            <CookStep
+              :view="view"
+              :number="i + 1"
+              :timing="timerStep === i"
+              :current="index === i"
+              selectable
+              @start-timer="startTimer(i)"
+              @select="selectStep(i)"
+            />
+          </li>
+        </ol>
+        <Button
+          :label="t('recipes.cookMode.finish')"
+          icon="mdi mdi-check"
+          size="large"
+          class="cook-flow-finish"
+          data-testid="cook-finish"
+          :loading="finishing"
+          @click="finish"
         />
-        <img v-if="step.image_id" :src="imageUrl(step.image_id, 'original')" alt="" class="cook-image" />
-        <div v-if="step.duration_minutes" class="cook-timer-start">
-          <Button
-            v-if="timerStep !== index"
-            :label="t('recipes.cookMode.startTimer', { m: step.duration_minutes })"
-            icon="mdi mdi-timer-outline"
-            severity="secondary"
-            outlined
-            size="large"
-            @click="startTimer"
-          />
-        </div>
-        <div v-if="stepIngredients.length" class="cook-ingredients">
-          <h2>{{ t('recipes.cookMode.ingredients') }}</h2>
-          <IngredientLines :items="stepIngredients" :marks="stepMarks" large />
-        </div>
-        <div v-if="stepEquipment.length" class="cook-ingredients" data-testid="cook-step-equipment">
-          <h2>{{ t('recipes.cookMode.equipment') }}</h2>
-          <EquipmentList :items="stepEquipment" large />
-        </div>
+      </div>
+
+      <section v-else-if="showIntro" class="cook-screen">
+        <CookIntro :needs="firstNeeds" :set-out="setOut" @cook-first="cookFirst" />
+        <Button
+          :label="t('recipes.cookMode.startSteps')"
+          icon="mdi mdi-chevron-right"
+          icon-pos="right"
+          size="large"
+          @click="showIntro = false"
+        />
       </section>
 
-      <section v-else class="cook-screen cook-finish">
-        <span class="mdi mdi-party-popper cook-finish-icon" aria-hidden="true" />
-        <h1 class="cook-heading">{{ t('recipes.cookMode.doneTitle') }}</h1>
-        <p class="cook-finish-text">{{ t('recipes.cookMode.doneText') }}</p>
-        <Button
-          v-if="!logged"
-          :label="t('recipes.cooked.button')"
-          icon="mdi mdi-check-circle-outline"
-          size="large"
-          @click="cookedOpen = true"
-        />
-        <p v-else class="cook-logged">
-          <span class="mdi mdi-check-circle" aria-hidden="true" />
-          {{ t('recipes.cooked.saved') }}
-        </p>
-        <Button
-          v-if="parentId"
-          :label="t('recipes.cookMode.backToParent')"
-          icon="mdi mdi-arrow-left"
-          size="large"
-          @click="backToParent"
-        />
-        <Button :label="t('recipes.cookMode.backToRecipe')" severity="secondary" text @click="close" />
+      <section v-else-if="current" :key="index" class="cook-screen" data-testid="cook-step">
+        <CookStep :view="current" :number="index + 1" :timing="timerStep === index" @start-timer="startTimer(index)" />
       </section>
     </div>
     <div v-else-if="failed" class="cook-stage">
@@ -483,7 +529,7 @@ onBeforeUnmount(() => {
       />
     </div>
 
-    <nav class="cook-nav" :aria-label="t('recipes.cookMode.navigation')">
+    <nav v-if="!flow" class="cook-nav" :aria-label="t('recipes.cookMode.navigation')">
       <Button
         icon="mdi mdi-chevron-left"
         :label="t('recipes.cookMode.prev')"
@@ -494,32 +540,26 @@ onBeforeUnmount(() => {
         @click="prev"
       />
       <Button
-        v-if="!isFinish"
+        v-if="!isLast"
         icon="mdi mdi-chevron-right"
         icon-pos="right"
-        :label="index + 1 === stepCount ? t('recipes.cookMode.finish') : t('recipes.cookMode.next')"
+        :label="t('recipes.cookMode.next')"
         size="large"
+        data-testid="cook-next"
         :disabled="!recipe || showAll || showIntro || askVersion"
         @click="next"
       />
       <Button
         v-else
-        icon="mdi mdi-restart"
-        :label="t('recipes.cookMode.restart')"
-        severity="secondary"
+        icon="mdi mdi-check"
+        :label="t('recipes.cookMode.finish')"
         size="large"
-        @click="goTo(0)"
+        data-testid="cook-finish"
+        :loading="finishing"
+        :disabled="!recipe || showAll || showIntro || askVersion"
+        @click="finish"
       />
     </nav>
-
-    <CookedDialog
-      v-if="recipe"
-      v-model:visible="cookedOpen"
-      :recipe-id="recipe.id"
-      :servings="servings"
-      :variation-id="variationId"
-      @logged="logged = true"
-    />
   </div>
 </template>
 
@@ -584,54 +624,6 @@ onBeforeUnmount(() => {
   font-size: clamp(2rem, 7vw, 3rem);
 }
 
-.cook-step-number {
-  display: grid;
-  place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-  background: var(--p-primary-color);
-  color: var(--p-primary-contrast-color);
-  font-weight: 800;
-  font-size: var(--font-size-2xl);
-}
-
-// The step text is what the cook reads from a step away, so it scales with
-// the screen instead of sitting at body size.
-.cook-step-text {
-  font-size: clamp(1.4rem, 5.5vw, 2.25rem);
-  line-height: 1.45;
-}
-
-.cook-image {
-  width: 100%;
-  max-height: 40vh;
-  object-fit: cover;
-  border-radius: var(--p-border-radius-lg);
-}
-
-.cook-ingredients {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--p-border-radius-lg);
-  background: var(--p-surface-50);
-
-  h2 {
-    font-family: var(--font-head);
-    font-weight: 700;
-    font-size: var(--font-size-md);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--p-text-muted-color);
-  }
-}
-
-.p-dark .cook-ingredients {
-  background: var(--p-surface-900);
-}
-
 .cook-versions {
   display: flex;
   flex-direction: column;
@@ -674,56 +666,41 @@ onBeforeUnmount(() => {
   color: var(--p-text-muted-color);
 }
 
-.cook-first {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.cook-first-item {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  border-radius: var(--p-border-radius-lg);
-  background: var(--p-surface-50);
-}
-
-.p-dark .cook-first-item {
-  background: var(--p-surface-900);
-}
-
-.cook-first-title {
-  font-size: clamp(1.15rem, 4.5vw, 1.5rem);
-  font-weight: 700;
-}
-
-.cook-finish {
-  align-items: center;
-  text-align: center;
-}
-
-.cook-finish-icon {
-  font-size: clamp(4rem, 20vw, 7rem);
-  color: var(--p-primary-color);
-}
-
-.cook-finish-text {
+.cook-muted {
   color: var(--p-text-muted-color);
   font-size: var(--font-size-lg);
 }
 
-.cook-logged {
+.cook-flow-steps {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-weight: 700;
-  color: var(--p-green-600);
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  > li {
+    scroll-margin-top: var(--space-3);
+  }
+}
+
+// Flow mode's steps sit on cards; the current one carries the primary colour
+// on its border, so the eye finds it again after looking at the pan.
+.cook-flow-steps :deep(.cook-step) {
+  padding: var(--space-4);
+  border: 1px solid var(--p-content-border-color);
+  border-radius: var(--p-border-radius-lg);
+  transition: border-color 0.2s;
+}
+
+.cook-flow-steps :deep(.cook-step--current) {
+  border-color: var(--p-primary-color);
+}
+
+.cook-flow-finish {
+  align-self: center;
+  min-width: min(100%, 14rem);
+  margin-bottom: var(--space-6);
 }
 
 .cook-timer {

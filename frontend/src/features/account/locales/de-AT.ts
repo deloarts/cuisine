@@ -52,6 +52,12 @@ export default {
     label: 'Bildschirm beim Kochen und Einkaufen nicht abschalten',
     hint: 'Solange ein Rezept, der Kochmodus oder eine Einkaufsliste offen ist, bleibt das Display an. Klappt nicht in jedem Browser.',
   },
+  cookModeLayout: {
+    label: 'Kochmodus',
+    step: 'Schritt für Schritt',
+    flow: 'Alle Schritte untereinander',
+    hint: 'So öffnet sich der Kochmodus. Du kannst dort jederzeit umschalten.',
+  },
   amountStyle: {
     label: 'Mengen in Rezepten',
     decimals: 'Genau als Kommazahl (0,125 l)',

@@ -87,6 +87,82 @@ async def test_cook_events_cannot_lie_in_the_future(cook: httpx.AsyncClient) -> 
     assert refused.status_code == 422
 
 
+def _log(recipe: str, day: date, servings: int = 2, note: str = "") -> dict[str, object]:
+    return {"recipe_id": recipe, "cooked_on": day.isoformat(), "servings": servings, "note": note}
+
+
+async def test_a_recipe_is_logged_once_a_day(cook: httpx.AsyncClient) -> None:
+    ids = await _soup(cook)
+    first = await cook.post(f"{WEB}/cook-events", headers=CSRF, json=_log(ids["recipe"], TODAY))
+    assert first.status_code == 201
+    again = await cook.post(
+        f"{WEB}/cook-events", headers=CSRF, json=_log(ids["recipe"], TODAY, note="Second dinner")
+    )
+    assert again.status_code == 409
+    assert again.json()["code"] == "CookEventExistsError"
+    yesterday = await cook.post(
+        f"{WEB}/cook-events", headers=CSRF, json=_log(ids["recipe"], TODAY - timedelta(days=1))
+    )
+    assert yesterday.status_code == 201
+
+    # Moving yesterday's event onto today collides; keeping its day does not.
+    event = yesterday.json()["id"]
+    moved = await cook.put(
+        f"{WEB}/cook-events/{event}",
+        headers=CSRF,
+        json={"cooked_on": TODAY.isoformat(), "servings": 2, "note": ""},
+    )
+    assert moved.status_code == 409
+    kept = await cook.put(
+        f"{WEB}/cook-events/{event}",
+        headers=CSRF,
+        json={"cooked_on": yesterday.json()["cooked_on"], "servings": 4, "note": "More"},
+    )
+    assert kept.status_code == 200, kept.text
+    assert kept.json()["servings"] == 4
+
+
+async def test_another_cook_logs_the_same_recipe_the_same_day(
+    cook: httpx.AsyncClient, admin: httpx.AsyncClient
+) -> None:
+    ids = await _soup(cook)
+    mine = await cook.post(f"{WEB}/cook-events", headers=CSRF, json=_log(ids["recipe"], TODAY))
+    theirs = await admin.post(f"{WEB}/cook-events", headers=CSRF, json=_log(ids["recipe"], TODAY))
+    assert (mine.status_code, theirs.status_code) == (201, 201)
+
+
+async def test_cook_mode_logs_once_and_repeats_harmlessly(cook: httpx.AsyncClient) -> None:
+    ids = await _soup(cook)
+    body = {"recipe_id": ids["recipe"], "cooked_on": TODAY.isoformat(), "servings": 3}
+    first = await cook.put(f"{WEB}/cook-events/once", headers=CSRF, json=body)
+    assert first.status_code == 200, first.text
+    assert first.json()["created"] is True
+    assert first.json()["event"]["servings"] == 3
+
+    second = await cook.put(f"{WEB}/cook-events/once", headers=CSRF, json={**body, "servings": 5})
+    assert second.status_code == 200
+    assert second.json()["created"] is False
+    assert second.json()["event"]["id"] == first.json()["event"]["id"]
+    assert second.json()["event"]["servings"] == 3
+
+    # A manual log after cook mode logged the day is refused like any other.
+    manual = await cook.post(f"{WEB}/cook-events", headers=CSRF, json=_log(ids["recipe"], TODAY))
+    assert manual.status_code == 409
+    mine = (await cook.get(f"{WEB}/recipes/{ids['recipe']}/cook-events")).json()
+    assert len(mine) == 1
+
+
+async def test_cook_mode_does_not_log_drafts_or_hidden_recipes(
+    cook: httpx.AsyncClient, admin: httpx.AsyncClient
+) -> None:
+    draft = await make_recipe(cook, "Entwurf", [("Kochen", [])], publish=False)
+    body = {"recipe_id": draft["id"], "cooked_on": TODAY.isoformat(), "servings": 2}
+    refused = await cook.put(f"{WEB}/cook-events/once", headers=CSRF, json=body)
+    assert refused.status_code == 422
+    hidden = await admin.put(f"{WEB}/cook-events/once", headers=CSRF, json=body)
+    assert hidden.status_code == 404
+
+
 async def test_meal_plan_is_personal_and_fills_a_shopping_list(
     cook: httpx.AsyncClient, admin: httpx.AsyncClient
 ) -> None:

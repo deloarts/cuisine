@@ -8,6 +8,7 @@ from dataclasses import field
 from datetime import datetime
 
 from src.platform.domain.value_objects.display import AmountStyle
+from src.platform.domain.value_objects.display import CookModeLayout
 from src.platform.domain.value_objects.language import Language
 from src.platform.domain.value_objects.theme import ThemePreset
 from src.platform.domain.value_objects.theme import ThemePrimary
@@ -76,6 +77,8 @@ class User(Entity):
     # Whether an open recipe page or shopping list keeps the phone's screen
     # from turning off, where the browser supports it. On by default.
     keep_screen_on: bool = True
+    # How cook mode shows the steps: one per screen or all in one column.
+    cook_mode_layout: CookModeLayout = CookModeLayout.STEP
     # The stored image shown as the user's avatar, or None for the initials.
     avatar_file_id: int | None = None
 

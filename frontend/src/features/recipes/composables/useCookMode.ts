@@ -1,22 +1,21 @@
 /**
- * Step navigation for cook mode. The screens are the recipe's steps plus a
- * last "done" screen that logs the meal, so `index === stepCount` is the
- * finish screen.
+ * Step navigation for cook mode, shared by both layouts: `index` is the
+ * current step, the one step mode shows and flow mode highlights. There is no
+ * screen after the last step; finishing leaves cook mode.
  */
 import { computed, ref, watch, type Ref } from 'vue'
 
 export function useCookMode(stepCount: Ref<number>) {
   const index = ref(0)
 
-  const screenCount = computed(() => stepCount.value + 1)
   const isFirst = computed(() => index.value === 0)
-  const isFinish = computed(() => index.value === stepCount.value)
+  const isLast = computed(() => index.value >= stepCount.value - 1)
   const progress = computed(() =>
-    stepCount.value === 0 ? 1 : Math.min(index.value / stepCount.value, 1),
+    stepCount.value === 0 ? 1 : Math.min((index.value + 1) / stepCount.value, 1),
   )
 
   function goTo(target: number) {
-    index.value = Math.max(0, Math.min(target, screenCount.value - 1))
+    index.value = Math.max(0, Math.min(target, stepCount.value - 1))
   }
 
   const next = () => goTo(index.value + 1)
@@ -25,7 +24,7 @@ export function useCookMode(stepCount: Ref<number>) {
   // A recipe that loads after the view mounted starts on its first step.
   watch(stepCount, () => goTo(index.value))
 
-  return { index, isFirst, isFinish, progress, screenCount, next, prev, goTo }
+  return { index, isFirst, isLast, progress, next, prev, goTo }
 }
 
 /**

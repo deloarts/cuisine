@@ -68,6 +68,9 @@ class UserModel(PublicIdMixin, Base):
     keep_screen_on: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default=true()
     )
+    cook_mode_layout: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="step", server_default="step"
+    )
     # use_alter breaks the cycle with stored_files.creator_id, so the tables
     # can be created and dropped in either order.
     avatar_file_id: Mapped[int | None] = mapped_column(

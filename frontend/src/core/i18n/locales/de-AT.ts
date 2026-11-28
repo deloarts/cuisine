@@ -651,6 +651,7 @@ export default {
     NotInHouseholdError: 'Dafür musst du zu einem Haushalt gehören.',
     MealPlanEntryNotFoundError: 'Diesen Eintrag im Essensplan gibt es nicht.',
     CookEventNotFoundError: 'Diesen Eintrag in deinem Kochverlauf gibt es nicht.',
+    CookEventExistsError: 'Du hast dieses Rezept an dem Tag schon eingetragen.',
     FoodRestrictionNotFoundError: 'Diese Ernährungseinschränkung gibt es nicht.',
     ShoppingListNotFoundError: 'Diese Einkaufsliste gibt es nicht, oder sie ist nicht mit dir geteilt.',
     ShoppingListNoteNotFoundError: 'Diese Mitteilung gibt es nicht mehr.',

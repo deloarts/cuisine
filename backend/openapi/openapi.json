@@ -2603,7 +2603,7 @@
           "cooking"
         ],
         "summary": "Create Cook Event",
-        "description": "\"I cooked this\": records the viewer cooking a recipe on a day.",
+        "description": "\"I cooked this\": records the viewer cooking a recipe on a day. A\nsecond log of the same recipe on the same day answers 409\nCookEventExistsError.",
         "operationId": "create_cook_event_api_v1_web_cook_events_post",
         "security": [
           {
@@ -2823,6 +2823,73 @@
                     "$ref": "#/components/schemas/CookEventResponse"
                   },
                   "title": "Response On This Day Api V1 Web Cook Events On This Day Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/web/cook-events/once": {
+      "put": {
+        "tags": [
+          "cooking"
+        ],
+        "summary": "Log Cook Once",
+        "description": "Logs the recipe as cooked on the day unless the viewer already did;\nrepeating it changes nothing. Cook mode calls it when the cook\nfinishes.",
+        "operationId": "log_cook_once_api_v1_web_cook_events_once_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ContentLocale"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The language to read in; defaults to the user's UI language.",
+              "title": "Locale"
+            },
+            "description": "The language to read in; defaults to the user's UI language."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CookOnceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CookOnceResponse"
                 }
               }
             }
@@ -17724,6 +17791,72 @@
         ],
         "title": "CookEventUpdate"
       },
+      "CookModeLayout": {
+        "type": "string",
+        "enum": [
+          "step",
+          "flow"
+        ],
+        "title": "CookModeLayout",
+        "description": "How cook mode lays out a recipe's steps, a display preference only."
+      },
+      "CookOnceRequest": {
+        "properties": {
+          "recipe_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Recipe Id"
+          },
+          "variation_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variation Id"
+          },
+          "cooked_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Cooked On"
+          },
+          "servings": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Servings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "recipe_id",
+          "cooked_on",
+          "servings"
+        ],
+        "title": "CookOnceRequest"
+      },
+      "CookOnceResponse": {
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/CookEventResponse"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event",
+          "created"
+        ],
+        "title": "CookOnceResponse"
+      },
       "CreateGroupRequest": {
         "properties": {
           "name": {
@@ -18063,6 +18196,9 @@
             "type": "boolean",
             "title": "Keep Screen On"
           },
+          "cook_mode_layout": {
+            "$ref": "#/components/schemas/CookModeLayout"
+          },
           "privacy_acknowledgement_pending": {
             "type": "boolean",
             "title": "Privacy Acknowledgement Pending",
@@ -18157,7 +18293,8 @@
           "recipe_show_cooked",
           "recipe_show_rating",
           "recipe_highlight_mentions",
-          "keep_screen_on"
+          "keep_screen_on",
+          "cook_mode_layout"
         ],
         "title": "CurrentUserResponse"
       },
@@ -30017,6 +30154,16 @@
               }
             ],
             "title": "Keep Screen On"
+          },
+          "cook_mode_layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CookModeLayout"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,

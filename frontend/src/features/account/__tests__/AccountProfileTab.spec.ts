@@ -35,6 +35,7 @@ const me = {
   recipe_show_rating: true,
   recipe_highlight_mentions: true,
   keep_screen_on: true,
+  cook_mode_layout: 'step',
   avatar_id: null,
   effective_permissions: [],
   is_systemuser: false,
@@ -128,6 +129,21 @@ describe('AccountProfileTab mention highlighting', () => {
     await new Promise((resolve) => setTimeout(resolve, 300))
     await flushPromises()
     expect(patch.mock.calls.at(-1)![1].body).toEqual({ keep_screen_on: false })
+  })
+
+  it('saves the cook mode layout', async () => {
+    patch.mockImplementation((_path, options) => Promise.resolve({ ...me, ...options.body }))
+    vi.spyOn(useCurrentUserStore(), 'apply').mockImplementation(() => {})
+    const wrapper = mountTab()
+    const select = wrapper
+      .findAllComponents({ name: 'Select' })
+      .find((c) => c.attributes('id') === 'profile-cook-mode-layout')!
+    expect(select.props('modelValue')).toBe('step')
+
+    select.vm.$emit('update:modelValue', 'flow')
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    await flushPromises()
+    expect(patch.mock.calls.at(-1)![1].body).toEqual({ cook_mode_layout: 'flow' })
   })
 })
 

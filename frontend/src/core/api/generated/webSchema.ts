@@ -3,7 +3,7 @@
  * Regenerate with: npm run generate:api-types
  *
  * Source: backend/openapi/openapi.json
- * Generated: 2026-11-27T16:39:58.759Z
+ * Generated: 2026-11-28T11:25:22.064Z
  */
 export interface paths {
     "/api/v1/auth/login": {
@@ -896,7 +896,9 @@ export interface paths {
         put?: never;
         /**
          * Create Cook Event
-         * @description "I cooked this": records the viewer cooking a recipe on a day.
+         * @description "I cooked this": records the viewer cooking a recipe on a day. A
+         *     second log of the same recipe on the same day answers 409
+         *     CookEventExistsError.
          */
         post: operations["create_cook_event_api_v1_web_cook_events_post"];
         delete?: never;
@@ -935,6 +937,28 @@ export interface paths {
          */
         get: operations["on_this_day_api_v1_web_cook_events_on_this_day_get"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/web/cook-events/once": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Log Cook Once
+         * @description Logs the recipe as cooked on the day unless the viewer already did;
+         *     repeating it changes nothing. Cook mode calls it when the cook
+         *     finishes.
+         */
+        put: operations["log_cook_once_api_v1_web_cook_events_once_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -5087,6 +5111,35 @@ export interface components {
              */
             note: string;
         };
+        /**
+         * CookModeLayout
+         * @description How cook mode lays out a recipe's steps, a display preference only.
+         * @enum {string}
+         */
+        CookModeLayout: "step" | "flow";
+        /** CookOnceRequest */
+        CookOnceRequest: {
+            /**
+             * Recipe Id
+             * Format: uuid
+             */
+            recipe_id: string;
+            /** Variation Id */
+            variation_id?: string | null;
+            /**
+             * Cooked On
+             * Format: date
+             */
+            cooked_on: string;
+            /** Servings */
+            servings: number;
+        };
+        /** CookOnceResponse */
+        CookOnceResponse: {
+            event: components["schemas"]["CookEventResponse"];
+            /** Created */
+            created: boolean;
+        };
         /** CreateGroupRequest */
         CreateGroupRequest: {
             /** Name */
@@ -5230,6 +5283,7 @@ export interface components {
             recipe_highlight_mentions: boolean;
             /** Keep Screen On */
             keep_screen_on: boolean;
+            cook_mode_layout: components["schemas"]["CookModeLayout"];
             /**
              * Privacy Acknowledgement Pending
              * @default false
@@ -9317,6 +9371,7 @@ export interface components {
             recipe_highlight_mentions?: boolean | null;
             /** Keep Screen On */
             keep_screen_on?: boolean | null;
+            cook_mode_layout?: components["schemas"]["CookModeLayout"] | null;
         };
         /** UpdateUserRequest */
         UpdateUserRequest: {
@@ -11606,6 +11661,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CookEventResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    log_cook_once_api_v1_web_cook_events_once_put: {
+        parameters: {
+            query?: {
+                /** @description The language to read in; defaults to the user's UI language. */
+                locale?: components["schemas"]["ContentLocale"] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CookOnceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CookOnceResponse"];
                 };
             };
             /** @description Validation Error */

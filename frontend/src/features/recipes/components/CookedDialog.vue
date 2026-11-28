@@ -1,12 +1,15 @@
 <script setup lang="ts">
 /**
  * Logs a meal: "I cooked this", with the day, the servings and an optional
- * note, naming the variation when one was cooked.
+ * note, naming the variation when one was cooked. A recipe is logged at most
+ * once a day; a day that already has it is named in the dialog, which stays
+ * open with the note so another day can be picked.
  */
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useAppToast } from '@/core/composables/useAppToast'
+import { errorCode } from '@/core/utils/errors'
 import { logCookEvent, type CookEventResponse } from '@/features/recipes/api/recipes'
 import { isoDay } from '@/features/recipes/utils/dates'
 
@@ -21,17 +24,23 @@ const day = ref(new Date())
 const servings = ref(props.servings)
 const note = ref('')
 const saving = ref(false)
+const alreadyLogged = ref(false)
 
 watch(visible, (open) => {
   if (open) {
     day.value = new Date()
     servings.value = props.servings
     note.value = ''
+    alreadyLogged.value = false
   }
+})
+watch(day, () => {
+  alreadyLogged.value = false
 })
 
 async function save() {
   saving.value = true
+  alreadyLogged.value = false
   try {
     const event = await logCookEvent(
       props.recipeId,
@@ -44,7 +53,8 @@ async function save() {
     emit('logged', event)
     visible.value = false
   } catch (err) {
-    toast.error(err)
+    if (errorCode(err) === 'CookEventExistsError') alreadyLogged.value = true
+    else toast.error(err)
   } finally {
     saving.value = false
   }
@@ -69,6 +79,9 @@ async function save() {
           fluid
           date-format="dd.mm.yy"
         />
+        <Message v-if="alreadyLogged" severity="warn" size="small" variant="simple" data-testid="cooked-exists">
+          {{ t('errors.CookEventExistsError') }}
+        </Message>
       </div>
       <div class="field">
         <label for="cooked-servings" class="field-label">{{ t('recipes.cooked.servings') }}</label>
