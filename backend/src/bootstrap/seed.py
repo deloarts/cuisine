@@ -4,8 +4,9 @@ system flag rather than by its address. The first start creates it; every
 later start syncs it back to the INIT__ values, so the environment stays the
 source of truth for its name, address and password and it is always active. A password
 or address changed in the app therefore lasts only until the next start.
-Several workers may start at once; the loser of the race hits a unique
-constraint and moves on.
+Several workers may start at once; the startup lock (startup_lock.py) lets
+them run this setup one after the other, and a unique constraint still
+catches a worker that races past it.
 
 The instance's own id (`instance_id`) is created here on the first start as
 well and never changed afterwards.

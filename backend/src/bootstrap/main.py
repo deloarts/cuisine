@@ -34,6 +34,7 @@ from src.bootstrap.seed import ensure_default_groups
 from src.bootstrap.seed import ensure_instance_id
 from src.bootstrap.seed import ensure_system_user
 from src.bootstrap.shopping_jobs import start_shopping_jobs
+from src.bootstrap.startup_lock import startup_lock
 from src.bootstrap.webhook_events import register_cookbook_webhook_events
 from src.bootstrap.webhook_worker import start_webhook_worker
 from src.bootstrap.worker_loop import stop_worker
@@ -114,10 +115,11 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     if cfg.migrate_on_startup:
         log.info("Applying migrations (MIGRATE_ON_STARTUP).")
         await to_thread.run_sync(upgrade_to_head)
-    if await ensure_system_user():
-        await ensure_default_groups()
-    await ensure_instance_id()
-    await ensure_cookbook_resources()
+    async with startup_lock(engine):
+        if await ensure_system_user():
+            await ensure_default_groups()
+        await ensure_instance_id()
+        await ensure_cookbook_resources()
     log.info("%s %s started.", NAME, VERSION)
     webhook_worker = start_webhook_worker()
     nightly = start_nightly_jobs()
