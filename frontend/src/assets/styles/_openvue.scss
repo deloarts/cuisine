@@ -46,6 +46,19 @@
   gap: var(--space-1);
 }
 
+// A Message is a grid around a flex row, and neither lets its text shrink
+// below its widest unbreakable line. A long line inside, such as the agent
+// connect command, would widen the whole message past its container and stop
+// the text beside it from wrapping. With a shrinkable column and text, the
+// message keeps its container's width and the long line scrolls in its own box.
+.p-message {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.p-message-text {
+  min-width: 0;
+}
+
 // A dialog takes a --dialog-width-* token as its width; on a narrow screen it
 // never grows past the viewport, whatever the token says.
 .p-dialog {
