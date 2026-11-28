@@ -1,0 +1,113 @@
+name: Add seed data
+description: Suggest an ingredient, piece of equipment, unit, tag, category, family or food fact that every instance should start with.
+labels: ["seed data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Seed data is the reference catalogue every Cuisine instance is created with (`backend/src/bootstrap/data/`). It is for everyday entries that most households would use. Anything specific to your own kitchen belongs in your instance's catalogue instead. The curation rules are in [docs/reference/cookbook.md](https://github.com/deloarts/cuisine/blob/main/docs/reference/cookbook.md#10-base-ingredient-catalogue), sections 9 and 10.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - Ingredient
+        - Equipment
+        - Unit
+        - Tag
+        - Ingredient category
+        - Ingredient family
+        - Food fact
+    validations:
+      required: true
+  - type: input
+    id: name-en
+    attributes:
+      label: English name (en-GB)
+      description: The British English name. For ingredients and units, give the singular and the plural.
+      placeholder: aubergine, aubergines
+    validations:
+      required: true
+  - type: input
+    id: name-de
+    attributes:
+      label: German name (de-AT)
+      description: The Austrian term. For ingredients and units, give the singular and the plural.
+      placeholder: Melanzani, Melanzani
+    validations:
+      required: true
+  - type: textarea
+    id: aliases
+    attributes:
+      label: Other names
+      description: Names for the same thing that search and imports should match, per language. US names go under en-GB, German German and regional names under de-AT. An alias names the same food or item, never a related one.
+      placeholder: |
+        en-GB: eggplant
+        de-AT: Aubergine
+  - type: input
+    id: category
+    attributes:
+      label: Category (ingredients only)
+      description: A key of `categories.yaml`, for example vegetables, dairy_eggs, spices or oils_sauces.
+  - type: dropdown
+    id: allergens
+    attributes:
+      label: Allergens (ingredients only)
+      description: The EU allergens that common products in an Austrian supermarket contain. Traces ("may contain") are not declared. Pick "None" when there are none.
+      multiple: true
+      options:
+        - None
+        - gluten
+        - crustaceans
+        - eggs
+        - fish
+        - peanuts
+        - soybeans
+        - milk
+        - nuts
+        - celery
+        - mustard
+        - sesame
+        - sulphites
+        - lupin
+        - molluscs
+  - type: dropdown
+    id: diet-markers
+    attributes:
+      label: Diet markers (ingredients only)
+      description: What the ingredient is or contains, as far as diets care. Pork and beef are also meat. Pick "None" when there are none.
+      multiple: true
+      options:
+        - None
+        - meat
+        - poultry
+        - pork
+        - beef
+        - fish
+        - seafood
+        - gelatin
+        - dairy
+        - eggs
+        - honey
+        - alcohol
+  - type: textarea
+    id: details
+    attributes:
+      label: Further details
+      description: |
+        Whatever else the kind needs. Ingredients: the USDA FoodData Central id of the generic raw or unprepared food, the season months in Austria, a density or grams per piece. Equipment: cookware, bakeware, appliance or utensil, and whether most kitchens have it. Units: mass, volume, count or other, the factor to grams or millilitres and the abbreviations. Tags: meal, cuisine, occasion or other. Food facts: the fact in both languages.
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources and reasoning
+      description: Why this belongs in every instance, and where the allergens, markers and nutrition come from (product labels you checked, the FDC entry, a stand-in food and why it is close enough).
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the seed files and the existing issues, and this entry is not there yet under any name.
+          required: true
+        - label: For an ingredient, I checked the allergens and diet markers against the labels of common products.
